@@ -5,6 +5,7 @@ const { check, validationResult } = require('express-validator');
 const generator = require('generate-password');
 const utils = require('./utils/utils');
 const mailer = require('./email/mailer');
+const useMail = require('../config/conf').useMail;
 
 router.get('/login', function(req, res, next) {
     db.query('SELECT 1 + 1 AS solution', function(error, results, fields) {
@@ -46,14 +47,19 @@ router.get('/register', [
                                 subject: 'Benvenuto in SteamParadise - Credenziali',
                                 text: `Password: ${password}`
                             }
-                            mailer.mailer.sendMail(mail, (err, info) => {
-                                if (err) {
-                                    res.send({ 'success': false, 'error': { 'type': 'mail', err } }).json();
-                                    return;
-                                } else {
-                                    res.send({ 'success': true }).json();
-                                }
-                            });
+                            if (useMail) {
+                                mailer.mailer.sendMail(mail, (err, info) => {
+                                    if (err) {
+                                        res.send({ 'success': false, 'error': { 'type': 'mail', err } }).json();
+                                        return;
+                                    } else {
+                                        res.send({ 'success': true }).json();
+                                    }
+                                });
+                            } else {
+                                res.send({ 'success': true }).json();
+                            }
+
                         }
                     });
                 } else {
