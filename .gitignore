@@ -1,6 +1,7 @@
 ### Node ###
 # Logs
 routes/db/dbConfig.js
+routes/email/mailConfig.js
 logs
 *.log
 npm-debug.log*
