@@ -4,8 +4,8 @@ const emailPasswd = require('./mailConfig');
 const mailer = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-        user: 'jstestnode@gmail.com',
-        pass: emailPasswd
+        user: 'jtestnode@gmail.com',
+        pass: emailPasswd.emailPasswd
     }
 });
 
