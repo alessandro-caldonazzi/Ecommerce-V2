@@ -15,6 +15,7 @@ describe('registrazione', () => {
             .post('/auth/register')
             .send({ 'email': 'email@example.com' })
             .end((err, res) => {
+                console.log(res.body)
                 res.should.have.status(200);
                 res.body.should.have.property('success');
                 res.body.success.should.equal(true);
