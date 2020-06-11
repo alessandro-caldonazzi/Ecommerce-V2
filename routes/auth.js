@@ -7,14 +7,14 @@ const utils = require('./utils/utils');
 const mailer = require('./email/mailer');
 const useMail = require('../config/conf').useMail;
 
-router.get('/login', function(req, res, next) {
+router.post('/login', function(req, res, next) {
     db.query('SELECT 1 + 1 AS solution', function(error, results, fields) {
         if (error) throw error;
         console.log('The solution is: ', results[0].solution);
     });
 });
 
-router.get('/register', [
+router.post('/register', [
     check('email').isEmail()
 ], (req, res, next) => {
     try {
@@ -69,7 +69,6 @@ router.get('/register', [
             }
         });
     } catch (err) {
-        console.log(err)
         res.status(403).json();
     }
 });
