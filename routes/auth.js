@@ -27,7 +27,6 @@ router.post('/register', [
         })
         const registrationDate = utils.getDate();
         const ip = utils.getIp(req);
-        const lastLoginDate = '0000/00/00 00:00:00';
         db.query('SELECT COUNT(1) FROM users WHERE email = ?', [email], (error, results, fields) => {
             if (error) {
                 res.send({ 'success': true, 'error': { 'type': 'mysql', error } }).json();
@@ -36,7 +35,7 @@ router.post('/register', [
                 if (!results[0]['COUNT(1)']) {
                     db.query('INSERT INTO users \
                     (rank, email, password, registrationDate, registrationIp, lastLoginDate) \
-                    VALUES (?, ?, ?, ?, ?, ?)', [0, email, password, registrationDate, ip, lastLoginDate], (err, result, fields) => {
+                    VALUES (?, ?, ?, ?, ?, ?)', [0, email, password, registrationDate, ip, registrationDate], (err, result, fields) => {
                         if (err) {
                             res.send({ 'success': false, 'error': { 'type': 'mysql', err } }).json();
                             return;
