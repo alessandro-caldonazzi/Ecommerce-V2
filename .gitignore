@@ -1,5 +1,6 @@
 ### Node ###
 # Logs
+routes/db/dbConfig.js
 logs
 *.log
 npm-debug.log*
