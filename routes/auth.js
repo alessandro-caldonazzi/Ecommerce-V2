@@ -6,17 +6,50 @@ const generator = require('generate-password');
 const utils = require('./utils/utils');
 const mailer = require('./email/mailer');
 const useMail = require('../config/conf').useMail;
+const bcrypt = require('bcrypt');
+const session = require('session-jwt');
 
-router.post('/login', function(req, res, next) {
-    db.query('SELECT 1 + 1 AS solution', function(error, results, fields) {
-        if (error) throw error;
-        console.log('The solution is: ', results[0].solution);
-    });
+router.post('/login', [
+    check('email').isEmail(),
+    check('password').notEmpty().isLength({ min: 12, max: 30 })
+], (req, res, next) => {
+    try {
+        const email = req.body.email;
+        const password = req.body.password;
+        db.query('SELECT * FROM users WHERE email = ? LIMIT 1', [email], (error, results, fields) => {
+            if (error) {
+                res.send({ 'success': false, 'error': { 'type': 'mysql', error } }).json();
+                return;
+            } else {
+                if (results) {
+                    bcrypt.compare(password, results[0].password, (err, res) => {
+                        if (err || res) {
+                            res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
+                            return;
+                        } else {
+                            let { jwtToken, refreshToken } = await session.newSession({
+                                'ID': results[0].rank,
+                                'refferalID': results[0].refferalID,
+                                'name': results[0].name
+                            });
+                            res.cookie("refresh", refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
+                            res.send({ 'success': true, 'data': { jwtToken } }).json();
+                        }
+                    });
+                } else {
+                    res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
+                    return;
+                }
+            }
+        });
+    } catch (error) {
+        res.status(403).json();
+    }
 });
 
 router.post('/register', [
     check('email').isEmail()
-], (req, res, next) => {
+], async(req, res, next) => {
     try {
         validationResult(req).throw();
         const email = req.body.email;
@@ -24,7 +57,8 @@ router.post('/register', [
             length: 15,
             numbers: true,
             symbols: true
-        })
+        });
+        const hashPassword = await bcrypt.hash(password, 10);
         const registrationDate = utils.getDate();
         const ip = utils.getIp(req);
         db.query('SELECT COUNT(1) FROM users WHERE email = ?', [email], (error, results, fields) => {
@@ -35,7 +69,7 @@ router.post('/register', [
                 if (!results[0]['COUNT(1)']) {
                     db.query('INSERT INTO users \
                     (rank, email, password, registrationDate, registrationIp, lastLoginDate) \
-                    VALUES (?, ?, ?, ?, ?, ?)', [0, email, password, registrationDate, ip, registrationDate], (err, result, fields) => {
+                    VALUES (?, ?, ?, ?, ?, ?)', [0, email, hashPassword, registrationDate, ip, registrationDate], (err, result, fields) => {
                         if (err) {
                             res.send({ 'success': false, 'error': { 'type': 'mysql', err } }).json();
                             return;

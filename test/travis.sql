@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `rank` INT(1) UNSIGNED NOT NULL,
   `email` VARCHAR(60) NOT NULL,
   `temporaryPassword` BOOLEAN DEFAULT TRUE,
-  `password` VARCHAR(30) NOT NULL, -- SHA3-256 (?)
+  `password` VARCHAR(60) NOT NULL, -- SHA3-256 (?)
   `referalID` INT UNSIGNED,
   `phoneNumber` VARCHAR(15),
   `name` VARCHAR(255),
