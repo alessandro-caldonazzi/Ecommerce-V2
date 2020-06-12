@@ -1,1 +1,1 @@
-module.exports.useMail = true;
+module.exports.inProduction = false;

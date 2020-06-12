@@ -5,7 +5,7 @@ const { check, validationResult } = require('express-validator');
 const generator = require('generate-password');
 const utils = require('./utils/utils');
 const mailer = require('./email/mailer');
-const useMail = require('../config/conf').useMail;
+const inProduction = require('../config/conf').inProduction;
 const bcrypt = require('bcrypt');
 const session = require('session-jwt');
 
@@ -82,7 +82,7 @@ router.post('/register', [
                                 subject: 'Benvenuto in SteamParadise - Credenziali',
                                 text: `Password: ${password}`
                             }
-                            if (useMail) {
+                            if (inProduction) {
                                 mailer.mailer.sendMail(mail, (err, info) => {
                                     if (err) {
                                         res.send({ 'success': false, 'error': { 'type': 'mail', err } }).json();
@@ -92,7 +92,7 @@ router.post('/register', [
                                     }
                                 });
                             } else {
-                                res.send({ 'success': true }).json();
+                                res.send({ 'success': true, 'data': { password } }).json();
                             }
 
                         }
@@ -108,19 +108,13 @@ router.post('/register', [
     }
 });
 
-router.post('/refresh', [
-    check('jwt').notEmpty().trim().escape()
-], async(req, res, next) => {
-    try {
-        let jwt = await session.refresh(req);
-        if (jwt) {
-            res.send({ 'success': true, 'data': { jwt } }).json();
-        } else {
-            res.redirect(301, "/auth/login");
-            res.end();
-        }
-    } catch (error) {
-        res.status(403).json();
+router.post('/refresh', async(req, res, next) => {
+    let jwtToken = await session.refresh(req);
+    if (jwtToken) {
+        res.send({ 'success': true, 'data': { jwtToken } }).json();
+    } else {
+        res.redirect(301, "/auth/login");
+        res.end();
     }
 });
 
