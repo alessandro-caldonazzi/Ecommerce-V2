@@ -14,6 +14,7 @@ router.post('/login', [
     check('password').notEmpty().isLength({ min: 12, max: 30 })
 ], (req, res, next) => {
     try {
+        validationResult(req).throw();
         const email = req.body.email;
         const password = req.body.password;
         db.query('SELECT * FROM users WHERE email = ? LIMIT 1', [email], (error, results, fields) => {
@@ -21,19 +22,20 @@ router.post('/login', [
                 res.send({ 'success': false, 'error': { 'type': 'mysql', error } }).json();
                 return;
             } else {
-                if (results) {
-                    bcrypt.compare(password, results[0].password, (err, res) => {
-                        if (err || res) {
+                if (results.length > 0) {
+                    bcrypt.compare(password, results[0].password, (err, result) => {
+                        if (err || !result) {
                             res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
                             return;
                         } else {
-                            let { jwtToken, refreshToken } = await session.newSession({
+                            session.newSession({
                                 'ID': results[0].rank,
                                 'refferalID': results[0].refferalID,
                                 'name': results[0].name
+                            }, (jwtToken, refreshToken) => {
+                                res.cookie("refresh", refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
+                                res.send({ 'success': true, 'data': { jwtToken } }).json();
                             });
-                            res.cookie("refresh", refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
-                            res.send({ 'success': true, 'data': { jwtToken } }).json();
                         }
                     });
                 } else {
@@ -102,6 +104,22 @@ router.post('/register', [
             }
         });
     } catch (err) {
+        res.status(403).json();
+    }
+});
+
+router.post('/refresh', [
+    check('jwt').notEmpty().trim().escape()
+], async(req, res, next) => {
+    try {
+        let jwt = await session.refresh(req);
+        if (jwt) {
+            res.send({ 'success': true, 'data': { jwt } }).json();
+        } else {
+            res.redirect(301, "/auth/login");
+            res.end();
+        }
+    } catch (error) {
         res.status(403).json();
     }
 });
