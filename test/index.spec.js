@@ -15,7 +15,7 @@ describe('registrazione', () => {
     step('registro utente valido', (done) => {
         chai.request(server)
             .post('/auth/register')
-            .send({ 'email': 'email@example.com' })
+            .send({ 'email': 'email@example.com', 'terms': true })
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.have.property('success');
@@ -28,7 +28,7 @@ describe('registrazione', () => {
     step('registro utente con mail uguale', (done) => {
         chai.request(server)
             .post('/auth/register')
-            .send({ 'email': 'email@example.com' })
+            .send({ 'email': 'email@example.com', 'terms': true })
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.have.property('success');
@@ -39,6 +39,16 @@ describe('registrazione', () => {
     });
 
     step('registro utente con mail sintatticamente invalida', (done) => {
+        chai.request(server)
+            .post('/auth/register')
+            .send({ 'email': '..@examp:le.com', 'terms': true })
+            .end((err, res) => {
+                res.should.have.status(403);
+                done();
+            });
+    });
+
+    step('registro utente senza termini validi', (done) => {
         chai.request(server)
             .post('/auth/register')
             .send({ 'email': '..@examp:le.com' })

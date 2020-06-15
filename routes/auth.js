@@ -50,10 +50,15 @@ router.post('/login', [
 });
 
 router.post('/register', [
-    check('email').isEmail()
+    check('email').isEmail(),
+    check('terms').isBoolean()
 ], async(req, res, next) => {
     try {
         validationResult(req).throw();
+        if (!req.body.terms) {
+            res.send({ 'success': false, 'error': { 'type': 'terms' } }).json();
+            return;
+        }
         const email = req.body.email;
         const password = generator.generate({
             length: 15,
