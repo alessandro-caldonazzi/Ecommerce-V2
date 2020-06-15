@@ -20,26 +20,25 @@ router.post('/login', [
         let user = await dbUtils.query('SELECT * FROM users WHERE email = ? LIMIT 1', [email], res, next);
 
         if (user.length > 0) {
-            bcrypt.compare(password, user[0].password, (err, result) => {
-                if (err || !result) {
-                    res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
-                    return;
+            let isPasswordCorrect;
+            isPasswordCorrect = await bcrypt.compare(password, user[0].password).catch(err => { isPasswordCorrect = false });
+            if (!isPasswordCorrect) {
+                res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
+                return;
+            } else {
+                let { jwtToken, refreshToken } = await session.newSession({
+                    'ID': user[0].rank,
+                    'referalID': user[0].referalID,
+                    'name': user[0].name,
+                    'email': email
+                });
+                res.cookie("refresh", refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
+                if (user[0].name && !user[0].temporaryPassword) {
+                    res.send({ 'success': true, 'data': { jwtToken } }).json();
                 } else {
-                    session.newSession({
-                        'ID': user[0].rank,
-                        'referalID': user[0].referalID,
-                        'name': user[0].name,
-                        'email': email
-                    }, (jwtToken, refreshToken) => {
-                        res.cookie("refresh", refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
-                        if (user[0].name && !user[0].temporaryPassword) {
-                            res.send({ 'success': true, 'data': { jwtToken } }).json();
-                        } else {
-                            res.send({ 'success': true, 'data': { jwtToken, 'temporaryPassword': user[0].temporaryPassword, 'name': user[0].name } }).json();
-                        }
-                    });
+                    res.send({ 'success': true, 'data': { jwtToken, 'temporaryPassword': user[0].temporaryPassword, 'name': user[0].name } }).json();
                 }
-            });
+            }
         } else {
             res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
             return;
