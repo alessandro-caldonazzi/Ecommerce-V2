@@ -8,6 +8,8 @@ chai.should();
 
 //clean table user
 db.query('DELETE FROM users', function(error, results, fields) {});
+db.query('ALTER TABLE users AUTO_INCREMENT = 1', function(error, results, fields) {});
+
 
 describe('registrazione', () => {
     let password;
@@ -21,6 +23,18 @@ describe('registrazione', () => {
                 res.body.should.have.property('success');
                 res.body.success.should.equal(true);
                 password = res.body.data.password;
+                done();
+            });
+    });
+
+    step('registro utente valido (ref del primo)', (done) => {
+        chai.request(server)
+            .post('/auth/register')
+            .send({ 'email': 'email1@example.com', 'terms': true, 'refferalID': 1 })
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.have.property('success');
+                res.body.success.should.equal(true);
                 done();
             });
     });

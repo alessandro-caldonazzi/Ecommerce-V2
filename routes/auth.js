@@ -30,7 +30,7 @@ router.post('/login', [
                         } else {
                             session.newSession({
                                 'ID': results[0].rank,
-                                'refferalID': results[0].refferalID,
+                                'referalID': results[0].referalID,
                                 'name': results[0].name
                             }, (jwtToken, refreshToken) => {
                                 res.cookie("refresh", refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
@@ -68,7 +68,7 @@ router.post('/register', [
         const hashPassword = await bcrypt.hash(password, 10);
         const registrationDate = utils.getDate();
         const ip = utils.getIp(req);
-        const refferalID = req.body.refferalID;
+        const referalID = req.body.refferalID;
 
         db.query('SELECT COUNT(1) FROM users WHERE email = ?', [email], (error, results, fields) => {
             if (error) {
@@ -81,12 +81,12 @@ router.post('/register', [
                     VALUES (?, ?, ?, ?, ?, ?)';
                     let values = [0, email, hashPassword, registrationDate, ip, registrationDate];
 
-                    if (Number.isInteger(refferalID)) {
+                    if (Number.isInteger(referalID)) {
                         query = 'INSERT INTO users \
-                        (rank, email, password, registrationDate, registrationIp, lastLoginDate, refferalID) \
+                        (rank, email, password, registrationDate, registrationIp, lastLoginDate, referalID) \
                         VALUES (?, ?, ?, ?, ?, ?, ?)';
 
-                        values.push(refferalID);
+                        values.push(referalID);
                     }
 
                     db.query(query, values, (err, result, fields) => {
