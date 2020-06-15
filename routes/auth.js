@@ -68,15 +68,28 @@ router.post('/register', [
         const hashPassword = await bcrypt.hash(password, 10);
         const registrationDate = utils.getDate();
         const ip = utils.getIp(req);
+        const refferalID = req.body.refferalID;
+
         db.query('SELECT COUNT(1) FROM users WHERE email = ?', [email], (error, results, fields) => {
             if (error) {
                 res.send({ 'success': true, 'error': { 'type': 'mysql', error } }).json();
                 return;
             } else {
                 if (!results[0]['COUNT(1)']) {
-                    db.query('INSERT INTO users \
+                    let query = 'INSERT INTO users \
                     (rank, email, password, registrationDate, registrationIp, lastLoginDate) \
-                    VALUES (?, ?, ?, ?, ?, ?)', [0, email, hashPassword, registrationDate, ip, registrationDate], (err, result, fields) => {
+                    VALUES (?, ?, ?, ?, ?, ?)';
+                    let values = [0, email, hashPassword, registrationDate, ip, registrationDate];
+
+                    if (Number.isInteger(refferalID)) {
+                        query = 'INSERT INTO users \
+                        (rank, email, password, registrationDate, registrationIp, lastLoginDate, refferalID) \
+                        VALUES (?, ?, ?, ?, ?, ?, ?)';
+
+                        values.push(refferalID);
+                    }
+
+                    db.query(query, values, (err, result, fields) => {
                         if (err) {
                             res.send({ 'success': false, 'error': { 'type': 'mysql', err } }).json();
                             return;
