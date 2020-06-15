@@ -31,10 +31,15 @@ router.post('/login', [
                             session.newSession({
                                 'ID': results[0].rank,
                                 'referalID': results[0].referalID,
-                                'name': results[0].name
+                                'name': results[0].name,
+                                'email': email
                             }, (jwtToken, refreshToken) => {
                                 res.cookie("refresh", refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
-                                res.send({ 'success': true, 'data': { jwtToken } }).json();
+                                if (results[0].name && !results[0].temporaryPassword) {
+                                    res.send({ 'success': true, 'data': { jwtToken } }).json();
+                                } else {
+                                    res.send({ 'success': true, 'data': { jwtToken, 'temporaryPassword': results[0].temporaryPassword, 'name': results[0].name } }).json();
+                                }
                             });
                         }
                     });
