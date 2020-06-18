@@ -33,7 +33,6 @@ router.post('/new', [
             return;
         }
     } catch (error) {
-        console.log(error)
         res.status(403).json();
     }
 });
