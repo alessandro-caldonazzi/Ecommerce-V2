@@ -14,6 +14,7 @@ db.query('ALTER TABLE users AUTO_INCREMENT = 1', function(error, results, fields
 
 describe('test', () => {
     let password;
+    let jwt;
     let refresh;
     step('registro utente valido', (done) => {
         chai.request(server)
@@ -130,6 +131,38 @@ describe('test', () => {
                 res.body.should.have.property('success');
                 res.body.success.should.equal(true);
                 jwt = res.body.data.jwtToken;
+                done();
+            });
+    });
+
+    step("Cambio password", (done) => {
+        chai.request(server)
+            .post("/user/changepassword")
+            .set("Cookie", refresh)
+            .set('jwt', jwt)
+            .send({ 'oldPassword': password, 'newPassword': 'lamianuovapassword' })
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a("object");
+                res.body.should.have.property('success');
+                res.body.success.should.equal(true);
+                password = 'lamianuovapassword'
+                console.log(res.body)
+                done();
+            });
+    });
+
+    step('login con nuova password', (done) => {
+        chai.request(server)
+            .post('/auth/login')
+            .send({ 'email': 'email@example.com', 'password': password })
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.have.property('success');
+                res.body.success.should.equal(true);
+                jwt = res.body.data.jwtToken;
+                res.header['set-cookie'].should.have.length(1);
+                refresh = res.header['set-cookie'][0];
                 done();
             });
     });

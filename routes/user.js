@@ -64,7 +64,11 @@ router.post('/changepassword', [
                 res.send({ 'success': false, 'error': { 'type': 'incorrectOldPassword' } }).json();
                 return;
             } else {
-                await dbUtils.query('UPDATE users SET password = ? WHERE email = ?', [hashNewPassword, jwt.email]);
+                if (user[0].temporaryPassword) {
+                    await dbUtils.query('UPDATE users SET password = ?, temporarypassword = 0 WHERE email = ?', [hashNewPassword, jwt.email]);
+                } else {
+                    await dbUtils.query('UPDATE users SET password = ? WHERE email = ?', [hashNewPassword, jwt.email]);
+                }
                 res.send({ 'success': true }).json();
             }
         } else {
