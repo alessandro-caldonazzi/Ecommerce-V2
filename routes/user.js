@@ -4,6 +4,8 @@ const db = require("./db/dbSocket");
 const { check, validationResult } = require('express-validator');
 const jwt = require('./utils/jwt');
 const dbUtils = require('./db/dbUtils');
+const bcrypt = require('bcrypt');
+
 
 /* GET users listing. */
 router.post('/new', [
@@ -37,7 +39,7 @@ router.post('/new', [
     }
 });
 
-router.post('/temporarypassword', [
+router.post('/changepassword', [
     check('oldPassword').notEmpty().isLength({ min: 12, max: 30 }),
     check('newPassword').notEmpty().isLength({ min: 12, max: 30 })
 ], async(req, res, next) => {

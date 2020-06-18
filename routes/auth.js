@@ -18,7 +18,6 @@ router.post('/login', [
         const email = req.body.email;
         const password = req.body.password;
         let user = await dbUtils.query('SELECT * FROM users WHERE email = ? LIMIT 1', [email], res, next);
-
         if (user.length > 0) {
             let isPasswordCorrect;
             isPasswordCorrect = await bcrypt.compare(password, user[0].password).catch(err => { isPasswordCorrect = false });
@@ -32,7 +31,7 @@ router.post('/login', [
                     'name': user[0].name,
                     'email': email
                 });
-                res.cookie("refresh", refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, secure: true });
+                res.cookie("refresh", refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, secure: false });
                 if (user[0].name && !user[0].temporaryPassword) {
                     res.send({ 'success': true, 'data': { jwtToken } }).json();
                 } else {
