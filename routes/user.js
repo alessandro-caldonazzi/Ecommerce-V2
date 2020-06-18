@@ -37,4 +37,42 @@ router.post('/new', [
     }
 });
 
+router.post('/temporarypassword', [
+    check('oldPassword').notEmpty().isLength({ min: 12, max: 30 }),
+    check('newPassword').notEmpty().isLength({ min: 12, max: 30 })
+], async(req, res, next) => {
+    try {
+        validationResult(req).throw();
+        const oldPassword = req.body.oldPassword;
+        const newPassword = req.body.newPassword;
+        const hashNewPassword = await bcrypt.hash(newPassword, 10);
+        const jwt = req.jwt;
+
+        if (oldPassword == newPassword) {
+            res.send({ 'success': false, 'error': { 'type': 'samePassword' } }).json();
+            return;
+        }
+
+        let user = await dbUtils.query('SELECT * FROM users WHERE email = ? LIMIT 1', [jwt.email], res, next);
+
+        if (user.length > 0) {
+            let isPasswordCorrect;
+            isPasswordCorrect = await bcrypt.compare(oldPassword, user[0].password).catch(err => { isPasswordCorrect = false });
+            if (!isPasswordCorrect) {
+                res.send({ 'success': false, 'error': { 'type': 'incorrectOldPassword' } }).json();
+                return;
+            } else {
+                await dbUtils.query('UPDATE users SET password = ? WHERE email = ?', [hashNewPassword, jwt.email]);
+                res.send({ 'success': true }).json();
+            }
+        } else {
+            res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
+            return;
+        }
+    } catch (error) {
+        console.log(error);
+        res.status(403).json();
+    }
+});
+
 module.exports = router;
