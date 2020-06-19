@@ -2,7 +2,8 @@ var express = require('express');
 var router = express.Router();
 const { check, validationResult } = require('express-validator');
 const jwt = require('./utils/jwt');
-const dbUtils = require('./db/dbUtils');
+const db = require('./db/dbUtils');
+const userUtils = require('./utils/userUtils');
 const bcrypt = require('bcrypt');
 
 
@@ -21,13 +22,11 @@ router.post('/new', [
         let decoded = await jwt.verify(req.cookies.refresh, 'segreto').catch(err => {});
 
         if (!decoded.name) {
-            let query = 'UPDATE users SET name = ? WHERE email = ?';
-            let values = [name, decoded.email];
             if (secretQuestion && secretAnswer) {
-                query = 'UPDATE users SET name = ?, secretQuestion = ?, secretAnswer = ? WHERE email = ?';
-                values = [name, secretQuestion, secretAnswer, decoded.email];
+                await userUtils.alterUserData(decoded.email, { name, secretQuestion, secretAnswer }, res, next);
+            } else {
+                await userUtils.alterUserData(decoded.email, { name }, res, next);
             }
-            await dbUtils.query(query, values, res, next);
             res.send({ 'success': true }).json();
         } else {
             res.send({ 'success': false, 'error': { 'type': 'mysql' } }).json();
@@ -54,7 +53,7 @@ router.post('/changepassword', [
             return;
         }
 
-        let user = await dbUtils.query('SELECT * FROM users WHERE email = ? LIMIT 1', [jwt.email], res, next);
+        let user = await db.query('SELECT * FROM users WHERE email = ? LIMIT 1', [jwt.email], res, next);
 
         if (user.length > 0) {
             let isPasswordCorrect;
@@ -64,9 +63,9 @@ router.post('/changepassword', [
                 return;
             } else {
                 if (user[0].temporaryPassword) {
-                    await dbUtils.query('UPDATE users SET password = ?, temporarypassword = 0 WHERE email = ?', [hashNewPassword, jwt.email], res, next);
+                    await db.query('UPDATE users SET password = ?, temporarypassword = 0 WHERE email = ?', [hashNewPassword, jwt.email], res, next);
                 } else {
-                    await dbUtils.query('UPDATE users SET password = ? WHERE email = ?', [hashNewPassword, jwt.email], res, next);
+                    await db.query('UPDATE users SET password = ? WHERE email = ?', [hashNewPassword, jwt.email], res, next);
                 }
                 res.send({ 'success': true }).json();
             }
@@ -89,7 +88,7 @@ router.post('/changemail', [
         const password = req.body.password;
         const jwt = req.jwt;
 
-        let user = await dbUtils.query('SELECT * FROM users WHERE email = ? LIMIT 1', [jwt.email], res, next);
+        let user = await db.query('SELECT * FROM users WHERE email = ? LIMIT 1', [jwt.email], res, next);
 
         if (user.length > 0) {
             let isPasswordCorrect;
@@ -98,7 +97,7 @@ router.post('/changemail', [
                 res.send({ 'success': false, 'error': { 'type': 'incorrectPassword' } }).json();
                 return;
             } else {
-                await dbUtils.query('UPDATE users SET email = ? WHERE email = ?', [newEmail, jwt.email], res, next);
+                await db.query('UPDATE users SET email = ? WHERE email = ?', [newEmail, jwt.email], res, next);
 
                 res.send({ 'success': true }).json();
             }
@@ -119,7 +118,7 @@ router.post('/addphone', [
         const phone = req.body.phone;
         const jwt = req.jwt;
 
-        await dbUtils.query('UPDATE users SET phoneNumber = ? WHERE email = ?', [phone, jwt.email], res, next);
+        await db.query('UPDATE users SET phoneNumber = ? WHERE email = ?', [phone, jwt.email], res, next);
         res.send({ 'success': true }).json();
     } catch (error) {
         res.status(403).json();
