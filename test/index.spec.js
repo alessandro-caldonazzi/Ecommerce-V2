@@ -146,8 +146,7 @@ describe('test', () => {
                 res.body.should.be.a("object");
                 res.body.should.have.property('success');
                 res.body.success.should.equal(true);
-                password = 'lamianuovapassword'
-                console.log(res.body)
+                password = 'lamianuovapassword';
                 done();
             });
     });
@@ -156,6 +155,36 @@ describe('test', () => {
         chai.request(server)
             .post('/auth/login')
             .send({ 'email': 'email@example.com', 'password': password })
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.have.property('success');
+                res.body.success.should.equal(true);
+                jwt = res.body.data.jwtToken;
+                res.header['set-cookie'].should.have.length(1);
+                refresh = res.header['set-cookie'][0];
+                done();
+            });
+    });
+
+    step("Cambio email", (done) => {
+        chai.request(server)
+            .post("/user/changemail")
+            .set("Cookie", refresh)
+            .set('jwt', jwt)
+            .send({ 'password': password, 'newEmail': 'nuovamail@example.com' })
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a("object");
+                res.body.should.have.property('success');
+                res.body.success.should.equal(true);
+                done();
+            });
+    });
+
+    step('login con nuova email', (done) => {
+        chai.request(server)
+            .post('/auth/login')
+            .send({ 'email': 'nuovamail@example.com', 'password': password })
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.have.property('success');

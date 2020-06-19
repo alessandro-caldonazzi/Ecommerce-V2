@@ -65,10 +65,42 @@ router.post('/changepassword', [
                 return;
             } else {
                 if (user[0].temporaryPassword) {
-                    await dbUtils.query('UPDATE users SET password = ?, temporarypassword = 0 WHERE email = ?', [hashNewPassword, jwt.email]);
+                    await dbUtils.query('UPDATE users SET password = ?, temporarypassword = 0 WHERE email = ?', [hashNewPassword, jwt.email], res, next);
                 } else {
-                    await dbUtils.query('UPDATE users SET password = ? WHERE email = ?', [hashNewPassword, jwt.email]);
+                    await dbUtils.query('UPDATE users SET password = ? WHERE email = ?', [hashNewPassword, jwt.email], res, next);
                 }
+                res.send({ 'success': true }).json();
+            }
+        } else {
+            res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
+            return;
+        }
+    } catch (error) {
+        res.status(403).json();
+    }
+});
+
+router.post('/changemail', [
+    check('newEmail').isEmail(),
+    check('password').notEmpty().isLength({ min: 12, max: 30 })
+], async(req, res, next) => {
+    try {
+        validationResult(req).throw();
+        const newEmail = req.body.newEmail;
+        const password = req.body.password;
+        const jwt = req.jwt;
+
+        let user = await dbUtils.query('SELECT * FROM users WHERE email = ? LIMIT 1', [jwt.email], res, next);
+
+        if (user.length > 0) {
+            let isPasswordCorrect;
+            isPasswordCorrect = await bcrypt.compare(password, user[0].password).catch(err => { isPasswordCorrect = false });
+            if (!isPasswordCorrect) {
+                res.send({ 'success': false, 'error': { 'type': 'incorrectPassword' } }).json();
+                return;
+            } else {
+                await dbUtils.query('UPDATE users SET email = ? WHERE email = ?', [newEmail, jwt.email], res, next);
+
                 res.send({ 'success': true }).json();
             }
         } else {
