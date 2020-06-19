@@ -1,6 +1,5 @@
 var express = require('express');
 var router = express.Router();
-const db = require("./db/dbSocket");
 const { check, validationResult } = require('express-validator');
 const jwt = require('./utils/jwt');
 const dbUtils = require('./db/dbUtils');
@@ -107,6 +106,21 @@ router.post('/changemail', [
             res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
             return;
         }
+    } catch (error) {
+        res.status(403).json();
+    }
+});
+
+router.post('/addphone', [
+    check('phone').isNumeric().isLength({ min: 10, max: 10 })
+], async(req, res, next) => {
+    try {
+        validationResult(req).throw;
+        const phone = req.body.phone;
+        const jwt = req.jwt;
+
+        await dbUtils.query('UPDATE users SET phoneNumber = ? WHERE email = ?', [phone, jwt.email], res, next);
+        res.send({ 'success': true }).json();
     } catch (error) {
         res.status(403).json();
     }

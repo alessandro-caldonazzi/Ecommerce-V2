@@ -19,7 +19,7 @@ app.use('/', indexRouter);
 app.use('/user', userRouter);
 app.use('/auth', authRouter);
 
-session.settings("segreto", ["/dashboard", '/user/changepassword', '/user/changemail'], "/auth/login", {
+session.settings("segreto", ["/dashboard", '/user/changepassword', '/user/changemail', '/user/addphone'], "/auth/login", {
     "refreshUrl": "/auth/refresh",
     "blacklisting": true,
     "JwtHeaderKeyName": "jwt"

@@ -195,4 +195,19 @@ describe('test', () => {
                 done();
             });
     });
+
+    step("Aggiungo numero di telefono", (done) => {
+        chai.request(server)
+            .post("/user/addphone")
+            .set("Cookie", refresh)
+            .set('jwt', jwt)
+            .send({ 'phone': 'aaaaaaaaaa' })
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a("object");
+                res.body.should.have.property('success');
+                res.body.success.should.equal(true);
+                done();
+            });
+    });
 });
