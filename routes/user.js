@@ -45,7 +45,7 @@ router.post('/changepassword', [
         validationResult(req).throw();
         const oldPassword = req.body.oldPassword;
         const newPassword = req.body.newPassword;
-        const hashNewPassword = await bcrypt.hash(newPassword, 10);
+        const password = await bcrypt.hash(newPassword, 10);
         const jwt = req.jwt;
 
         if (oldPassword == newPassword) {
@@ -63,9 +63,9 @@ router.post('/changepassword', [
                 return;
             } else {
                 if (user[0].temporaryPassword) {
-                    await db.query('UPDATE users SET password = ?, temporarypassword = 0 WHERE email = ?', [hashNewPassword, jwt.email], res, next);
+                    await userUtils.alterUserData(jwt.email, { password, 'temporarypassword': 0 }, res, next);
                 } else {
-                    await db.query('UPDATE users SET password = ? WHERE email = ?', [hashNewPassword, jwt.email], res, next);
+                    await userUtils.alterUserData(jwt.email, { password }, res, next);
                 }
                 res.send({ 'success': true }).json();
             }
@@ -98,7 +98,7 @@ router.post('/changemail', [
                 return;
             } else {
                 await db.query('UPDATE users SET email = ? WHERE email = ?', [newEmail, jwt.email], res, next);
-
+                await userUtils.alterUserData(jwt.email, { 'email': newEmail }, res, next);
                 res.send({ 'success': true }).json();
             }
         } else {
@@ -115,10 +115,10 @@ router.post('/addphone', [
 ], async(req, res, next) => {
     try {
         validationResult(req).throw;
-        const phone = req.body.phone;
+        const phoneNumber = req.body.phone;
         const jwt = req.jwt;
 
-        await db.query('UPDATE users SET phoneNumber = ? WHERE email = ?', [phone, jwt.email], res, next);
+        await userUtils.alterUserData(jwt.email, { phoneNumber }, res, next);
         res.send({ 'success': true }).json();
     } catch (error) {
         res.status(403).json();
