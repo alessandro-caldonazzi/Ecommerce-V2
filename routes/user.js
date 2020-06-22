@@ -53,26 +53,15 @@ router.post('/changepassword', [
             return;
         }
 
-        let user = await db.query('SELECT * FROM users WHERE email = ? LIMIT 1', [jwt.email], res, next);
+        let user = await userUtils.checkPassword(jwt.email, oldPassword, res, next);
 
-        if (user.length > 0) {
-            let isPasswordCorrect;
-            isPasswordCorrect = await bcrypt.compare(oldPassword, user[0].password).catch(err => { isPasswordCorrect = false });
-            if (!isPasswordCorrect) {
-                res.send({ 'success': false, 'error': { 'type': 'incorrectOldPassword' } }).json();
-                return;
-            } else {
-                if (user[0].temporaryPassword) {
-                    await userUtils.alterUserData(jwt.email, { password, 'temporarypassword': 0 }, res, next);
-                } else {
-                    await userUtils.alterUserData(jwt.email, { password }, res, next);
-                }
-                res.send({ 'success': true }).json();
-            }
+        if (user.temporaryPassword) {
+            await userUtils.alterUserData(jwt.email, { password, 'temporarypassword': 0 }, res, next);
         } else {
-            res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
-            return;
+            await userUtils.alterUserData(jwt.email, { password }, res, next);
         }
+        res.send({ 'success': true }).json();
+
     } catch (error) {
         res.status(403).json();
     }
@@ -88,6 +77,11 @@ router.post('/changemail', [
         const password = req.body.password;
         const jwt = req.jwt;
 
+        await userUtils.checkPassword(jwt.email, password, res, next);
+
+        await userUtils.alterUserData(jwt.email, { 'email': newEmail }, res, next);
+        res.send({ 'success': true }).json();
+        /*
         let user = await db.query('SELECT * FROM users WHERE email = ? LIMIT 1', [jwt.email], res, next);
 
         if (user.length > 0) {
@@ -105,6 +99,7 @@ router.post('/changemail', [
             res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
             return;
         }
+        */
     } catch (error) {
         res.status(403).json();
     }
