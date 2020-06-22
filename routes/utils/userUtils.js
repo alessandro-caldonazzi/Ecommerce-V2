@@ -31,3 +31,15 @@ module.exports.checkPassword = (email, password, res, next) => {
         }
     });
 }
+
+module.exports.getInfo = (email, res, next) => {
+    return new Promise(async(resolve) => {
+        let user = await dbUtils.query('SELECT * FROM users WHERE email = ? LIMIT 1', [email], res, next);
+        if (user.length > 0) {
+            resolve(user[0]);
+        } else {
+            res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
+            next();
+        }
+    });
+}
