@@ -81,25 +81,7 @@ router.post('/changemail', [
 
         await userUtils.alterUserData(jwt.email, { 'email': newEmail }, res, next);
         res.send({ 'success': true }).json();
-        /*
-        let user = await db.query('SELECT * FROM users WHERE email = ? LIMIT 1', [jwt.email], res, next);
 
-        if (user.length > 0) {
-            let isPasswordCorrect;
-            isPasswordCorrect = await bcrypt.compare(password, user[0].password).catch(err => { isPasswordCorrect = false });
-            if (!isPasswordCorrect) {
-                res.send({ 'success': false, 'error': { 'type': 'incorrectPassword' } }).json();
-                return;
-            } else {
-                await db.query('UPDATE users SET email = ? WHERE email = ?', [newEmail, jwt.email], res, next);
-                await userUtils.alterUserData(jwt.email, { 'email': newEmail }, res, next);
-                res.send({ 'success': true }).json();
-            }
-        } else {
-            res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
-            return;
-        }
-        */
     } catch (error) {
         res.status(403).json();
     }
@@ -118,6 +100,13 @@ router.post('/addphone', [
     } catch (error) {
         res.status(403).json();
     }
+});
+
+router.post('/deleteaccount', async(req, res, next) => {
+    const jwt = req.jwt;
+    await db.query('DELETE FROM users WHERE email = ?', [jwt.email], res, next);
+    res.send({ 'success': true }).json();
+
 });
 
 module.exports = router;
