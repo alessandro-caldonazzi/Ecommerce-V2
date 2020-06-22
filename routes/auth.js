@@ -8,6 +8,7 @@ const inProduction = require('../config/conf').inProduction;
 const bcrypt = require('bcrypt');
 const session = require('session-jwt');
 const dbUtils = require('./db/dbUtils')
+const userUtils = require('./utils/userUtils');
 
 router.post('/login', [
     check('email').isEmail(),
@@ -17,32 +18,21 @@ router.post('/login', [
         validationResult(req).throw();
         const email = req.body.email;
         const password = req.body.password;
-        let user = await dbUtils.query('SELECT * FROM users WHERE email = ? LIMIT 1', [email], res, next);
-        if (user.length > 0) {
-            let isPasswordCorrect;
-            isPasswordCorrect = await bcrypt.compare(password, user[0].password).catch(err => { isPasswordCorrect = false });
-            if (!isPasswordCorrect) {
-                res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
-                return;
-            } else {
-                let { jwtToken, refreshToken } = await session.newSession({
-                    'ID': user[0].rank,
-                    'referalID': user[0].referalID,
-                    'name': user[0].name,
-                    'email': email
-                });
-                res.cookie("refresh", refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, secure: false });
-                if (user[0].name && !user[0].temporaryPassword) {
-                    res.send({ 'success': true, 'data': { jwtToken } }).json();
-                } else {
-                    res.send({ 'success': true, 'data': { jwtToken, 'temporaryPassword': user[0].temporaryPassword, 'name': user[0].name } }).json();
-                }
-            }
+        let user = await userUtils.checkPassword(email, password, res, next);
+        let { jwtToken, refreshToken } = await session.newSession({
+            'ID': user.rank,
+            'referalID': user.referalID,
+            'name': user.name,
+            'email': email
+        });
+        res.cookie("refresh", refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, secure: false });
+        if (user.name && !user.temporaryPassword) {
+            res.send({ 'success': true, 'data': { jwtToken } }).json();
         } else {
-            res.send({ 'success': false, 'error': { 'type': 'userNotExist' } }).json();
-            return;
+            res.send({ 'success': true, 'data': { jwtToken, 'temporaryPassword': user.temporaryPassword, 'name': user.name } }).json();
         }
     } catch (error) {
+        console.log(error)
         res.status(403).json();
     }
 });
