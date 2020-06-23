@@ -224,4 +224,17 @@ describe('test', () => {
                 done();
             });
     });
+
+    step("get user info", (done) => {
+        chai.request(server)
+            .post("/user/info")
+            .set('jwt', jwt)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a("object");
+                res.body.should.have.property('success');
+                res.body.success.should.equal(true);
+                done();
+            });
+    });
 });
