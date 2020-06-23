@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 const { check, validationResult } = require('express-validator');
 const jwt = require('./utils/jwt');
+const utils = require('./utils/utils');
 const db = require('./db/dbUtils');
 const userUtils = require('./utils/userUtils');
 const bcrypt = require('bcrypt');
@@ -106,7 +107,13 @@ router.post('/deleteaccount', async(req, res, next) => {
     const jwt = req.jwt;
     await db.query('DELETE FROM users WHERE email = ?', [jwt.email], res, next);
     res.send({ 'success': true }).json();
+});
 
+router.post('/info', async(req, res, next) => {
+    const jwt = req.jwt;
+    let user = await userUtils.getInfo(jwt.email, res, next);
+    utils.deleteProps(user, ['lastLoginIp', 'secretAnswer', 'secretQuestion', 'registrationIp', 'password', 'temporaryPassword']);
+    res.send({ 'success': true, 'data': user }).json();
 });
 
 module.exports = router;

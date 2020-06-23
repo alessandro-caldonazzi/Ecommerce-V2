@@ -19,3 +19,9 @@ module.exports.getIp = (req) => {
 function IntTwoChars(i) {
     return (`0${i}`).slice(-2);
 }
+
+module.exports.deleteProps = (obj, prop) => {
+    for (const p of prop) {
+        (p in obj) && (delete obj[p]);
+    }
+}
