@@ -112,4 +112,46 @@ router.post('/refresh', async(req, res, next) => {
     }
 });
 
+router.post('/forgot', [
+    check('email').isEmail()
+], async(req, res, next) => {
+    try {
+        validationResult(req).throw();
+        const email = req.body.email;
+        const password = generator.generate({
+            length: 15,
+            numbers: true,
+            symbols: true
+        });
+        const hashPassword = await bcrypt.hash(password, 10);
+
+        let mail = {
+            from: 'jtestnode@gmail.com',
+            to: email,
+            subject: 'Ecco le tue nuove credenziali',
+            text: `Password: ${password}`
+        }
+
+        userUtils.alterUserData(email, { 'password': hashPassword, 'temporaryPassword': 1 }, res, next);
+
+        if (inProduction) {
+            mailer.mailer.sendMail(mail, (err, info) => {
+                if (err) {
+                    res.send({ 'success': false, 'error': { 'type': 'mail', err } }).json();
+                    return;
+                } else {
+                    res.send({ 'success': true }).json();
+                }
+            });
+        } else {
+            res.send({ 'success': true, 'data': { password } }).json();
+        }
+
+
+    } catch (error) {
+        console.log(error)
+        res.status(403).json();
+    }
+});
+
 module.exports = router;
