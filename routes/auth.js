@@ -18,6 +18,9 @@ router.post('/login', [
         validationResult(req).throw();
         const email = req.body.email;
         const password = req.body.password;
+        const loginDate = utils.getDate();
+        const ip = utils.getIp(req);
+
         let user = await userUtils.checkPassword(email, password, res, next);
         let { jwtToken, refreshToken } = await session.newSession({
             'ID': user.rank,
@@ -25,6 +28,9 @@ router.post('/login', [
             'name': user.name,
             'email': email
         });
+
+        userUtils.alterUserData(email, { 'lastLoginIp': ip, 'lastLoginDate': loginDate });
+
         res.cookie("refresh", refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, secure: false });
         if (user.name && !user.temporaryPassword) {
             res.send({ 'success': true, 'data': { jwtToken } }).json();
