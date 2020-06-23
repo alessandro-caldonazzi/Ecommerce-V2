@@ -210,4 +210,18 @@ describe('test', () => {
                 done();
             });
     });
+
+    step("Forgot password", (done) => {
+        chai.request(server)
+            .post("/auth/forgot")
+            .send({ 'email': 'email@example.com' })
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a("object");
+                res.body.should.have.property('success');
+                res.body.success.should.equal(true);
+                password = res.body.data.password;
+                done();
+            });
+    });
 });
