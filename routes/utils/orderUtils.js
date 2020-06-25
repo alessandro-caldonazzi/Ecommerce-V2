@@ -10,8 +10,8 @@ class Order {
     }
 
     async postToDb(res, next) {
-        await dbUtils.query('INSERT INTO transactions (type, userID) VALUES (?, ?)', [1, this.userID], res, next);
-        await dbUtils.query('INSERT INTO orders (userID, order, status, comment) VALUES (?, ?, ?, ?)', [this.userID, this.order, this.status, this.comment], res, next);
+        await dbUtils.query('INSERT INTO transactions (type, userID) OUTPUT INSERTED.ID VALUES (?, ?)', [1, this.userID], res, next);
+        await dbUtils.query('INSERT INTO orders (userID, order, status, comment, transactionID) VALUES (?, ?, ?, ?, ?)', [this.userID, this.order, this.status, this.comment, this], res, next);
     }
 
     async getFromDb(ID, res, next) {
@@ -28,3 +28,6 @@ class Order {
         }
     }
 }
+
+let a = new Order(3, "aa", "aaa", 1);
+a.postToDb()
