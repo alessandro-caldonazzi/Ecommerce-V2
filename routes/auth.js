@@ -16,8 +16,8 @@ router.post('/login', [
 ], async(req, res, next) => {
     try {
         validationResult(req).throw();
-        const email = req.sanitize(req.body.email);
-        const password = req.sanitize(req.body.password);
+        const email = req.body.email;
+        const password = req.body.password;
         const loginDate = utils.getDate();
         const ip = utils.getIp(req);
 
@@ -31,7 +31,6 @@ router.post('/login', [
 
         userUtils.alterUserData(email, { 'lastLoginIp': ip, 'lastLoginDate': loginDate });
 
-        // deepcode ignore WebCookieSecureDisabledByDefault: <please specify a reason of ignoring this>, deepcode ignore WebCookieSecureDisabledByDefault: <please specify a reason of ignoring this>, deepcode ignore WebCookieHttpOnlyDisabledByDefault: <please specify a reason of ignoring this>
         res.cookie("refresh", refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, secure: false });
         if (user.name && !user.temporaryPassword) {
             res.send({ 'success': true, 'data': { jwtToken } }).json();
@@ -54,7 +53,7 @@ router.post('/register', [
             res.send({ 'success': false, 'error': { 'type': 'terms' } }).json();
             return;
         }
-        const email = req.sanitize(req.body.email);
+        const email = req.body.email;
         const password = generator.generate({
             length: 15,
             numbers: true,
@@ -95,7 +94,7 @@ router.post('/register', [
         if (inProduction) {
             mailer.mailer.sendMail(mail, (err, info) => {
                 if (err) {
-                    res.send({ 'success': false, 'error': { 'type': 'mail' } }).json();
+                    res.send({ 'success': false, 'error': { 'type': 'mail', err } }).json();
                     return;
                 } else {
                     res.send({ 'success': true }).json();
@@ -124,7 +123,7 @@ router.post('/forgot', [
 ], async(req, res, next) => {
     try {
         validationResult(req).throw();
-        const email = req.sanitize(req.body.email);
+        const email = req.body.email;
         const password = generator.generate({
             length: 15,
             numbers: true,
@@ -144,7 +143,7 @@ router.post('/forgot', [
         if (inProduction) {
             mailer.mailer.sendMail(mail, (err, info) => {
                 if (err) {
-                    res.send({ 'success': false, 'error': { 'type': 'mail' } }).json();
+                    res.send({ 'success': false, 'error': { 'type': 'mail', err } }).json();
                     return;
                 } else {
                     res.send({ 'success': true }).json();

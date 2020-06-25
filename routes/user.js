@@ -17,9 +17,9 @@ router.post('/new', [
 ], async(req, res, next) => {
     try {
         validationResult(req).throw();
-        const name = req.sanitize(req.body.name);
-        const secretQuestion = req.sanitize(req.body.secretQuestion);
-        const secretAnswer = req.sanitize(req.body.secretAnswer);
+        const name = req.body.name;
+        const secretQuestion = req.body.secretQuestion;
+        const secretAnswer = req.body.secretAnswer;
         let decoded = await jwt.verify(req.cookies.refresh, 'segreto').catch(err => {});
 
         if (!decoded.name) {
@@ -44,8 +44,8 @@ router.post('/changepassword', [
 ], async(req, res, next) => {
     try {
         validationResult(req).throw();
-        const oldPassword = req.sanitize(req.body.oldPassword);
-        const newPassword = req.sanitize(req.body.newPassword);
+        const oldPassword = req.body.oldPassword;
+        const newPassword = req.body.newPassword;
         const password = await bcrypt.hash(newPassword, 10);
         const jwt = req.jwt;
 
@@ -74,8 +74,8 @@ router.post('/changemail', [
 ], async(req, res, next) => {
     try {
         validationResult(req).throw();
-        const newEmail = req.sanitize(req.body.newEmail);
-        const password = req.sanitize(req.body.password);
+        const newEmail = req.body.newEmail;
+        const password = req.body.password;
         const jwt = req.jwt;
 
         await userUtils.checkPassword(jwt.email, password, res, next);
@@ -93,7 +93,7 @@ router.post('/addphone', [
 ], async(req, res, next) => {
     try {
         validationResult(req).throw;
-        const phoneNumber = req.sanitize(req.body.phone);
+        const phoneNumber = req.body.phone;
         const jwt = req.jwt;
 
         await userUtils.alterUserData(jwt.email, { phoneNumber }, res, next);
