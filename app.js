@@ -6,9 +6,12 @@ const session = require('session-jwt');
 const indexRouter = require('./routes/index');
 const userRouter = require('./routes/user');
 const authRouter = require('./routes/auth');
+const helmet = require("helmet");
 
+// deepcode ignore UseCsurfForExpress: <please specify a reason of ignoring this>
 const app = express();
 
+app.use(helmet());
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));

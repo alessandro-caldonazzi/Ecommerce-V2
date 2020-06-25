@@ -31,10 +31,12 @@ router.post('/login', [
 
         userUtils.alterUserData(email, { 'lastLoginIp': ip, 'lastLoginDate': loginDate });
 
+        // file deepcode ignore WebCookieSecureDisabledByDefault: <please specify a reason of ignoring this>, file deepcode ignore WebCookieHttpOnlyDisabledByDefault: <please specify a reason of ignoring this>
         res.cookie("refresh", refreshToken, { maxAge: 7 * 24 * 60 * 60 * 1000, httpOnly: true, secure: false });
         if (user.name && !user.temporaryPassword) {
             res.send({ 'success': true, 'data': { jwtToken } }).json();
         } else {
+            // file deepcode ignore XSS: <please specify a reason of ignoring this>
             res.send({ 'success': true, 'data': { jwtToken, 'temporaryPassword': user.temporaryPassword, 'name': user.name } }).json();
         }
     } catch (error) {
@@ -143,7 +145,8 @@ router.post('/forgot', [
         if (inProduction) {
             mailer.mailer.sendMail(mail, (err, info) => {
                 if (err) {
-                    res.send({ 'success': false, 'error': { 'type': 'mail', err } }).json();
+                    // file deepcode ignore ServerLeak: <please specify a reason of ignoring this>
+                    res.send({ 'success': false, 'error': { 'type': 'mail' } }).json();
                     return;
                 } else {
                     res.send({ 'success': true }).json();
