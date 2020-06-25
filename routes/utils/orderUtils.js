@@ -28,6 +28,11 @@ class Order {
             'userID': order.userID
         }
     }
+
+    async changeStatus(status, res, next) {
+        this.status = status;
+        await db.query('UPDATE orders SET status = ? WHERE ID = ?', [status, this.ID], res, next);
+    }
 }
 
 let a = new Order(3, "aa", "aaa", 1);
