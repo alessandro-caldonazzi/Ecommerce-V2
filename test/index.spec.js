@@ -8,6 +8,8 @@ chai.should();
 let should = chai.should();
 
 //clean table user
+db.query('DELETE FROM transaction', [], function(error, results, fields) {});
+db.query('DELETE FROM orders', [], function(error, results, fields) {});
 db.query('DELETE FROM users', [], function(error, results, fields) {});
 db.query('ALTER TABLE users AUTO_INCREMENT = 1', function(error, results, fields) {});
 
