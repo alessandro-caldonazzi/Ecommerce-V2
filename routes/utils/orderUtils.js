@@ -10,8 +10,9 @@ class Order {
     }
 
     async postToDb(res, next) {
-        await dbUtils.query('INSERT INTO transactions (type, userID) OUTPUT INSERTED.ID VALUES (?, ?)', [1, this.userID], res, next);
-        await dbUtils.query('INSERT INTO orders (userID, order, status, comment, transactionID) VALUES (?, ?, ?, ?, ?)', [this.userID, this.order, this.status, this.comment, this], res, next);
+        await dbUtils.query('INSERT INTO transactions (type, userID) VALUES (?, ?)', [1, this.userID], res, next);
+        let transactionID = await dbUtils.query('SELECT LAST_INSERT_ID()');
+        await dbUtils.query('INSERT INTO orders (userID, `order`, status, comment, transactionID) VALUES (?, ?, ?, ?, ?)', [this.userID, this.order, this.status, this.comment, transactionID[0]['LAST_INSERT_ID()']], res, next);
     }
 
     async getFromDb(ID, res, next) {
