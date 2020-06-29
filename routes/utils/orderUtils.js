@@ -14,13 +14,14 @@ class Order {
     }
 
     async getFromDb(ID, res, next) {
-        let order = await dbUtils.query('SELECT `order`, status, comment, userID, transactionID, ID FROM orders WHERE orders.ID = ?', [ID], res, next);
+        let order = await dbUtils.query('SELECT `order`, status, comment, userID, transactionID, ID, price FROM orders WHERE orders.ID = ?', [ID], res, next);
         order = order[0];
         this.order = order.order;
         this.comment = order.comment;
         this.status = order.status;
         this.userID = order.userID;
         this.ID = order.ID;
+        this.price = order.price;
 
         if (order.transactionID) {
             order = await dbUtils.query('SELECT * FROM transactions WHERE ID = ?', [order.transactionID], res, next);
@@ -28,7 +29,9 @@ class Order {
             this.transaction = {
                 'ID': order.ID,
                 'type': order.type,
-                'userID': order.userID
+                'userID': order.userID,
+                'credits': order.credits,
+                'status': order.status
             }
         }
     }
@@ -41,11 +44,16 @@ class Order {
     async connectTransaction(transactionID, res, next) {
         await dbUtils.query('UPDATE orders SET transactionID = ? WHERE ID = ?', [transactionID, this.ID], res, next)
     }
+
+    async createTransaction(type, res, next, userID, credit, status) {
+        await dbUtils.query('INSERT INTO transactions (type, userID, credit, status) VALUES (?, ?, ?, ?)', [type, userID, credit, status], res, next);
+    }
 }
 
 (async() => {
-    let a = new Order();
-    await a.getFromDb(4)
+    let a = new Order(1, "aa", "comment", 1);
+    await a.getFromDb(1)
+    await a.createTransaction(1, null, null, 1)
     await a.connectTransaction(1)
-    await a.getFromDb(4)
+    await a.getFromDb(1)
 })();
