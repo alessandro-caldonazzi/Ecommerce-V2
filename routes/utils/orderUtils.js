@@ -60,7 +60,7 @@ class Order {
     async addPrice(price, res, next) {
         await dbUtils.query('UPDATE orders SET price = ? WHERE ID = ?', [price, this.ID], res, next);
         if (this.transaction.ID) {
-            await dbUtils.query('UPDATE transactions SET credits = ? WHERE ID = ?', [price, this.ID], res, next);
+            await dbUtils.query('UPDATE transactions SET credits = ? WHERE ID = ?', [price, this.transaction.ID], res, next);
         }
     }
 }
@@ -69,5 +69,5 @@ class Order {
     let a = new Order();
     await a.getFromDb(1)
     await a.connectTransaction(1)
-    await a.addPrice(300);
+    await a.addPrice(350);
 })();
