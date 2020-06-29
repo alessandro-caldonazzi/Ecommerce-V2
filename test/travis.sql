@@ -42,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `transactions` (
   CONSTRAINT `FK_transactions_users`
     FOREIGN KEY (`userID`)
     REFERENCES `users`(`ID`)
-    ON DELETE NO CASCADE
+    ON DELETE CASCADE
     ON UPDATE NO ACTION
 );
 
@@ -65,11 +65,11 @@ CREATE TABLE IF NOT EXISTS `orders` (
   CONSTRAINT `FK_orders_transactions`
     FOREIGN KEY (`transactionID`)
     REFERENCES `transactions`(`ID`)
-    ON DELETE NO CASCADE
+    ON DELETE CASCADE
     ON UPDATE NO ACTION,
   CONSTRAINT `FK_orders_users`
     FOREIGN KEY (`userID`)
     REFERENCES `users`(`ID`)
-    ON DELETE NO CASCADE
+    ON DELETE CASCADE
     ON UPDATE NO ACTION
 );
