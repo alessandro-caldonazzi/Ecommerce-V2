@@ -14,12 +14,13 @@ class Order {
     }
 
     async getFromDb(ID, res, next) {
-        let order = await dbUtils.query('SELECT `order`, status, comment, userID, transactionID FROM orders WHERE orders.ID = ?', [ID], res, next);
+        let order = await dbUtils.query('SELECT `order`, status, comment, userID, transactionID, ID FROM orders WHERE orders.ID = ?', [ID], res, next);
         order = order[0];
         this.order = order.order;
         this.comment = order.comment;
         this.status = order.status;
         this.userID = order.userID;
+        this.ID = order.ID;
 
         if (order.transactionID) {
             order = await dbUtils.query('SELECT * FROM transactions WHERE ID = ?', [order.transactionID], res, next);
@@ -34,13 +35,17 @@ class Order {
 
     async changeStatus(status, res, next) {
         this.status = status;
-        await db.query('UPDATE orders SET status = ? WHERE ID = ?', [status, this.ID], res, next);
+        await dbUtils.query('UPDATE orders SET status = ? WHERE ID = ?', [status, this.ID], res, next);
     }
 
     async connectTransaction(transactionID, res, next) {
-        await db.query('UPDATE orders SET transactionID = ? WHERE ID = ?', [transactionID, this.ID], res, next)
+        await dbUtils.query('UPDATE orders SET transactionID = ? WHERE ID = ?', [transactionID, this.ID], res, next)
     }
 }
 
-let a = new Order();
-a.getFromDb(4)
+(async() => {
+    let a = new Order();
+    await a.getFromDb(4)
+    await a.connectTransaction(1)
+    await a.getFromDb(4)
+})();
