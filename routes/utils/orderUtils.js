@@ -48,6 +48,10 @@ class Order {
     async createTransaction(type, res, next, userID, credit, status) {
         await dbUtils.query('INSERT INTO transactions (type, userID, credit, status) VALUES (?, ?, ?, ?)', [type, userID, credit, status], res, next);
     }
+
+    async addPrice(price, res, next) {
+        await dbUtils.query('UPDATE orders SET price = ? WHERE ID = ?', [price, this.ID], res, next);
+    }
 }
 
 (async() => {
