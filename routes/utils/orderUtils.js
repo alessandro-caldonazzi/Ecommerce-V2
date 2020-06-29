@@ -11,6 +11,8 @@ class Order {
 
     async postToDb(res, next) {
         await dbUtils.query('INSERT INTO orders (userID, `order`, status, comment) VALUES (?, ?, ?, ?)', [this.userID, this.order, this.status, this.comment], res, next);
+        let ID = await dbUtils.query('SELECT LAST_INSERT_ID();', {}, res, next);
+        this.ID = ID[0]['LAST_INSERT_ID'];
     }
 
     async getFromDb(ID, res, next) {
