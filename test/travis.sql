@@ -32,6 +32,8 @@ CREATE TABLE IF NOT EXISTS `transactions` (
   `ID` INT UNSIGNED AUTO_INCREMENT,
   `type` INT(1) UNSIGNED NOT NULL,
   `userID` INT UNSIGNED NOT NULL,
+  `credits` FLOAT,
+  `status` INT(1) UNSIGNED Default 1,
 
   -- Index
   PRIMARY KEY (`ID`),
@@ -49,10 +51,11 @@ USE `mydb`;
 CREATE TABLE IF NOT EXISTS `orders` (
   `ID` INT UNSIGNED AUTO_INCREMENT,
   `transactionID` INT UNSIGNED,
-  `status` INT(1) UNSIGNED NOT NULL,
+  `status` INT(1) UNSIGNED Default 1,
   `order` TEXT(1000) NOT NULL,
   `comment` VARCHAR(255),
   `userID` INT UNSIGNED NOT NULL,
+  `price` FLOAT,
 
   -- Index
   PRIMARY KEY (`ID`),
