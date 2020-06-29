@@ -45,8 +45,16 @@ class Order {
         await dbUtils.query('UPDATE orders SET transactionID = ? WHERE ID = ?', [transactionID, this.ID], res, next)
     }
 
-    async createTransaction(type, res, next, userID, credit, status) {
-        await dbUtils.query('INSERT INTO transactions (type, userID, credit, status) VALUES (?, ?, ?, ?)', [type, userID, credit, status], res, next);
+    async createTransaction(type, res, next, userID, credits, status) {
+        await dbUtils.query('INSERT INTO transactions (type, userID, credits, status) VALUES (?, ?, ?, ?)', [type, userID, credit, status], res, next);
+        let ID = await dbUtils.query('SELECT LAST_INSERT_ID();', {}, res, next);
+        this.transaction = {
+            'ID': ID[0]['LAST_INSERT_ID'],
+            'type': type,
+            'userID': userID,
+            'credits': credits,
+            'status': status
+        }
     }
 
     async addPrice(price, res, next) {
