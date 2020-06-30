@@ -1,7 +1,6 @@
 const dbUtils = require('../db/dbUtils');
 
-/*module.exports.Order = */
-class Order {
+module.exports.Order = class Order {
     constructor(userID, order, comment, status) {
         this.userID = userID;
         this.order = order;
@@ -94,10 +93,3 @@ class Order {
         return this.price;
     }
 }
-
-(async() => {
-    let a = new Order();
-    await a.getFromDb(1)
-    await a.connectTransaction(1)
-    await a.addPrice(350);
-})();
