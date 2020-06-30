@@ -26,7 +26,8 @@ router.post('/login', [
             'ID': user.ID,
             'referalID': user.referalID,
             'name': user.name,
-            'email': email
+            'email': email,
+            'rank': user.rank
         });
 
         userUtils.alterUserData(email, { 'lastLoginIp': ip, 'lastLoginDate': loginDate });

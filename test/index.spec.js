@@ -18,6 +18,7 @@ describe('test', () => {
     let password;
     let jwt;
     let refresh;
+    let IDorder;
     step('registro utente valido', (done) => {
         chai.request(server)
             .post('/auth/register')
@@ -262,6 +263,7 @@ describe('test', () => {
                 res.body.should.be.a("object");
                 res.body.should.have.property('success');
                 res.body.success.should.equal(true);
+                IDorder = res.body.data.ID;
                 done();
             });
     });
@@ -276,6 +278,17 @@ describe('test', () => {
                 res.body.should.be.a("object");
                 res.body.should.have.property('success');
                 res.body.success.should.equal(true);
+                done();
+            });
+    });
+
+    step("cambio stato ordine senza permessi", (done) => {
+        chai.request(server)
+            .post("/order/changestatus")
+            .set('jwt', jwt)
+            .send({ 'status': 2, 'ID': IDorder })
+            .end((err, res) => {
+                res.should.have.status(403);
                 done();
             });
     });
