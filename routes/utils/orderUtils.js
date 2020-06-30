@@ -2,32 +2,32 @@ const dbUtils = require('../db/dbUtils');
 
 module.exports = class Order {
     constructor(userID, order, comment, status) {
-        this.userID = userID;
-        this.order = order;
-        this.comment = comment;
-        this.status = status;
+        this._userID = userID;
+        this._order = order;
+        this._comment = comment;
+        this._status = status;
     }
 
     async postToDb(res, next) {
         await dbUtils.query('INSERT INTO orders (userID, `order`, status, comment) VALUES (?, ?, ?, ?)', [this.userID, this.order, this.status, this.comment], res, next);
         let ID = await dbUtils.query('SELECT LAST_INSERT_ID();', {}, res, next);
-        this.ID = ID[0]['LAST_INSERT_ID'];
+        this._ID = ID[0]['LAST_INSERT_ID'];
     }
 
     async getFromDb(ID, res, next) {
         let order = await dbUtils.query('SELECT `order`, status, comment, userID, transactionID, ID, price FROM orders WHERE orders.ID = ?', [ID], res, next);
         order = order[0];
-        this.order = order.order;
-        this.comment = order.comment;
-        this.status = order.status;
-        this.userID = order.userID;
-        this.ID = order.ID;
-        this.price = order.price;
+        this._order = order.order;
+        this._comment = order.comment;
+        this._status = order.status;
+        this._userID = order.userID;
+        this._ID = order.ID;
+        this._price = order.price;
 
         if (order.transactionID) {
             order = await dbUtils.query('SELECT * FROM transactions WHERE ID = ?', [order.transactionID], res, next);
             order = order[0];
-            this.transaction = {
+            this._transaction = {
                 'ID': order.ID,
                 'type': order.type,
                 'userID': order.userID,
@@ -38,7 +38,7 @@ module.exports = class Order {
     }
 
     async changeStatus(status, res, next) {
-        this.status = status;
+        this._status = status;
         await dbUtils.query('UPDATE orders SET status = ? WHERE ID = ?', [status, this.ID], res, next);
     }
 
@@ -49,7 +49,7 @@ module.exports = class Order {
     async createTransaction(type, res, next, userID, credits, status) {
         await dbUtils.query('INSERT INTO transactions (type, userID, credits, status) VALUES (?, ?, ?, ?)', [type, userID, credit, status], res, next);
         let ID = await dbUtils.query('SELECT LAST_INSERT_ID();', {}, res, next);
-        this.transaction = {
+        this._transaction = {
             'ID': ID[0]['LAST_INSERT_ID'],
             'type': type,
             'userID': userID,
@@ -66,30 +66,31 @@ module.exports = class Order {
     }
 
     get order() {
-        return this.order;
+        return this._order;
     }
 
     get comment() {
-        return this.comment;
+        return this._comment;
     }
 
     get status() {
-        return this.status;
+        return this._status;
     }
 
     get userID() {
-        return this.userID;
+        return this._userID;
     }
 
     get ID() {
-        return this.ID;
+        return this._ID;
     }
 
     get transaction() {
-        return this.transaction;
+        return this._transaction;
     }
 
     get price() {
-        return this.price;
+        return this._price;
     }
+
 }
