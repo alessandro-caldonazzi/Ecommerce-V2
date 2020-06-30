@@ -239,4 +239,18 @@ describe('test', () => {
                 done();
             });
     });
+
+    step("create order", (done) => {
+        chai.request(server)
+            .post("/order/new")
+            .set('jwt', jwt)
+            .send({ 'order': 'Gta V', 'comment': 'urgente' })
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a("object");
+                res.body.should.have.property('success');
+                res.body.success.should.equal(true);
+                done();
+            });
+    });
 });
