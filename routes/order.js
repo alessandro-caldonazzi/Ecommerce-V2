@@ -38,16 +38,11 @@ router.post('/changestatus', [
         if (Number.isNaN(ID) || Number.isNaN(status)) throw 'Invalid ID or status';
 
         let order = new Order();
-        let isOrder = await order.getFromDb(ID, res, next);
-        if (isOrder) {
-            await order.changeStatus(status);
-            res.send({ 'success': true });
-        } else {
-            res.send({ 'success': false, 'error': { 'type': 'ID' } });
-        }
+        await order.getFromDb(ID, res, next);
+        await order.changeStatus(status);
+        res.send({ 'success': true });
 
     } catch (err) {
-        console.log(err)
         res.status(403).json();
     }
 });
@@ -66,15 +61,11 @@ router.post('/addprice', [
         if (Number.isNaN(ID) || Number.isNaN(price)) throw 'Invalid ID or price';
 
         let order = new Order();
-        let isOrder = await order.getFromDb(ID, res, next);
-        if (isOrder) {
-            await order.addPrice(price);
-            res.send({ 'success': true });
-        } else {
-            res.send({ 'success': false, 'error': { 'type': 'ID' } });
-        }
+        await order.getFromDb(ID, res, next);
+        await order.addPrice(price);
+        res.send({ 'success': true });
+
     } catch (err) {
-        console.log(err)
         res.status(403).json();
     }
 });

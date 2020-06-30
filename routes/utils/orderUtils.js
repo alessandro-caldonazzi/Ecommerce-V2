@@ -35,9 +35,9 @@ module.exports = class Order {
                     'status': order.status
                 }
             }
-            return true;
         } else {
-            return false;
+            res.send({ 'success': false, 'error': { 'type': 'ID' } });
+            next();
         }
     }
 
