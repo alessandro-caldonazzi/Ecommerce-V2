@@ -15,24 +15,29 @@ module.exports = class Order {
 
     async getFromDb(ID, res, next) {
         let order = await dbUtils.query('SELECT `order`, status, comment, userID, transactionID, ID, price FROM orders WHERE orders.ID = ?', [ID], res, next);
-        order = order[0];
-        this._order = order.order;
-        this._comment = order.comment;
-        this._status = order.status;
-        this._userID = order.userID;
-        this._ID = order.ID;
-        this._price = order.price;
-
-        if (order.transactionID) {
-            order = await dbUtils.query('SELECT * FROM transactions WHERE ID = ?', [order.transactionID], res, next);
+        if (order.length > 0) {
             order = order[0];
-            this._transaction = {
-                'ID': order.ID,
-                'type': order.type,
-                'userID': order.userID,
-                'credits': order.credits,
-                'status': order.status
+            this._order = order.order;
+            this._comment = order.comment;
+            this._status = order.status;
+            this._userID = order.userID;
+            this._ID = order.ID;
+            this._price = order.price;
+
+            if (order.transactionID) {
+                order = await dbUtils.query('SELECT * FROM transactions WHERE ID = ?', [order.transactionID], res, next);
+                order = order[0];
+                this._transaction = {
+                    'ID': order.ID,
+                    'type': order.type,
+                    'userID': order.userID,
+                    'credits': order.credits,
+                    'status': order.status
+                }
             }
+            return true;
+        } else {
+            return false;
         }
     }
 
@@ -58,7 +63,7 @@ module.exports = class Order {
 
     async addPrice(price, res, next) {
         await dbUtils.query('UPDATE orders SET price = ? WHERE ID = ?', [price, this._ID], res, next);
-        if (this._transaction.ID) {
+        if (this._transaction && this._transaction.ID) {
             await dbUtils.query('UPDATE transactions SET credits = ? WHERE ID = ?', [price, this._transaction.ID], res, next);
         }
     }

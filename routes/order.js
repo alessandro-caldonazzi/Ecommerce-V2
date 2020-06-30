@@ -38,10 +38,41 @@ router.post('/changestatus', [
         if (Number.isNaN(ID) || Number.isNaN(status)) throw 'Invalid ID or status';
 
         let order = new Order();
-        await order.getFromDb(ID, res, next);
-        await order.changeStatus(status);
+        let isOrder = await order.getFromDb(ID, res, next);
+        if (isOrder) {
+            await order.changeStatus(status);
+            res.send({ 'success': true });
+        } else {
+            res.send({ 'success': false, 'error': { 'type': 'ID' } });
+        }
 
-        res.send({ 'success': true });
+    } catch (err) {
+        console.log(err)
+        res.status(403).json();
+    }
+});
+
+router.post('/addprice', [
+    check('ID').notEmpty().isLength({ min: 1, max: 10 }),
+    check('price').notEmpty().matches('[0-9,.]+').isLength({ min: 1, max: 6 })
+], async(req, res, next) => {
+    try {
+        validationResult(req).throw();
+        const jwt = req.jwt;
+        const ID = Number.parseInt(req.body.ID);
+        const price = Number.parseFloat(req.body.price);
+
+        if (jwt.rank < 1) throw 'Invalid Permission';
+        if (Number.isNaN(ID) || Number.isNaN(price)) throw 'Invalid ID or price';
+
+        let order = new Order();
+        let isOrder = await order.getFromDb(ID, res, next);
+        if (isOrder) {
+            await order.addPrice(price);
+            res.send({ 'success': true });
+        } else {
+            res.send({ 'success': false, 'error': { 'type': 'ID' } });
+        }
     } catch (err) {
         console.log(err)
         res.status(403).json();
