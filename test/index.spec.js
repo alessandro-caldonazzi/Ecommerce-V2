@@ -203,7 +203,7 @@ describe('test', () => {
             .post("/user/addphone")
             .set("Cookie", refresh)
             .set('jwt', jwt)
-            .send({ 'phone': 'aaaaaaaaaa' })
+            .send({ 'phone': '1234567890' })
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.a("object");

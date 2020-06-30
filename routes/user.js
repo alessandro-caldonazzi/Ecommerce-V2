@@ -89,12 +89,14 @@ router.post('/changemail', [
 });
 
 router.post('/addphone', [
-    check('phone').isNumeric().isLength({ min: 10, max: 10 })
+    check('phone').isLength({ min: 10, max: 10 })
 ], async(req, res, next) => {
     try {
         validationResult(req).throw;
-        const phoneNumber = req.body.phone;
+        const phoneNumber = Number.parseInt(req.body.phone);
         const jwt = req.jwt;
+
+        if (Number.isNaN(phoneNumber)) throw 'Invalid phone number';
 
         await userUtils.alterUserData(jwt.email, { phoneNumber }, res, next);
         res.send({ 'success': true }).json();
