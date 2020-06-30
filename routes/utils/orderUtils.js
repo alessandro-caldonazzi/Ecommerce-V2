@@ -9,9 +9,8 @@ module.exports = class Order {
     }
 
     async postToDb(res, next) {
-        await dbUtils.query('INSERT INTO orders (userID, `order`, status, comment) VALUES (?, ?, ?, ?)', [this.userID, this.order, this.status, this.comment], res, next);
-        let ID = await dbUtils.query('SELECT LAST_INSERT_ID();', {}, res, next);
-        this._ID = ID[0]['LAST_INSERT_ID'];
+        let ID = await dbUtils.query('INSERT INTO orders (userID, `order`, status, comment) VALUES (?, ?, ?, ?)', [this._userID, this._order, this._status, this._comment], res, next);
+        this._ID = ID.insertId;
     }
 
     async getFromDb(ID, res, next) {
@@ -39,18 +38,17 @@ module.exports = class Order {
 
     async changeStatus(status, res, next) {
         this._status = status;
-        await dbUtils.query('UPDATE orders SET status = ? WHERE ID = ?', [status, this.ID], res, next);
+        await dbUtils.query('UPDATE orders SET status = ? WHERE ID = ?', [status, this._ID], res, next);
     }
 
     async connectTransaction(transactionID, res, next) {
-        await dbUtils.query('UPDATE orders SET transactionID = ? WHERE ID = ?', [transactionID, this.ID], res, next)
+        await dbUtils.query('UPDATE orders SET transactionID = ? WHERE ID = ?', [transactionID, this._ID], res, next)
     }
 
     async createTransaction(type, res, next, userID, credits, status) {
-        await dbUtils.query('INSERT INTO transactions (type, userID, credits, status) VALUES (?, ?, ?, ?)', [type, userID, credit, status], res, next);
-        let ID = await dbUtils.query('SELECT LAST_INSERT_ID();', {}, res, next);
+        let ID = await dbUtils.query('INSERT INTO transactions (type, userID, credits, status) VALUES (?, ?, ?, ?)', [type, userID, credit, status], res, next);
         this._transaction = {
-            'ID': ID[0]['LAST_INSERT_ID'],
+            'ID': ID.insertId,
             'type': type,
             'userID': userID,
             'credits': credits,
@@ -59,9 +57,9 @@ module.exports = class Order {
     }
 
     async addPrice(price, res, next) {
-        await dbUtils.query('UPDATE orders SET price = ? WHERE ID = ?', [price, this.ID], res, next);
-        if (this.transaction.ID) {
-            await dbUtils.query('UPDATE transactions SET credits = ? WHERE ID = ?', [price, this.transaction.ID], res, next);
+        await dbUtils.query('UPDATE orders SET price = ? WHERE ID = ?', [price, this._ID], res, next);
+        if (this._transaction.ID) {
+            await dbUtils.query('UPDATE transactions SET credits = ? WHERE ID = ?', [price, this._transaction.ID], res, next);
         }
     }
 
