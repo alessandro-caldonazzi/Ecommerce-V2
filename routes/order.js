@@ -11,13 +11,13 @@ router.post('/new', [
         const jwt = req.jwt;
         const userOrder = req.body.order;
         const userComment = req.body.comment;
-        let order;
 
-        if (userComment && (typeof userComment == 'string') && userComment.length > 0 && userComment.length < 255) {
-            order = new Order(jwt.ID, UserOrder, userComment, 1);
-        } else {
-            order = new Order(jwt.ID, UserOrder, null, 1);
+        if (!(userComment && (typeof userComment == 'string') && userComment.length > 0 && userComment.length < 255)) {
+            userComment = null;
         }
+
+        let order = new Order(jwt.ID, userOrder, userComment, 1);
+
     } catch (err) {
         console.log(err);
         res.status(403).json();
