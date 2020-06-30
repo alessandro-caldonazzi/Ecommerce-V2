@@ -65,6 +65,34 @@ class Order {
             await dbUtils.query('UPDATE transactions SET credits = ? WHERE ID = ?', [price, this.transaction.ID], res, next);
         }
     }
+
+    get order() {
+        return this.order;
+    }
+
+    get comment() {
+        return this.comment;
+    }
+
+    get status() {
+        return this.status;
+    }
+
+    get userID() {
+        return this.userID;
+    }
+
+    get ID() {
+        return this.ID;
+    }
+
+    get transaction() {
+        return this.transaction;
+    }
+
+    get price() {
+        return this.price;
+    }
 }
 
 (async() => {
