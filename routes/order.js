@@ -4,22 +4,27 @@ const { check, validationResult } = require('express-validator');
 const Order = require('./utils/orderUtils');
 
 router.post('/new', [
-    check('order').notEmpty().isString().trim().escape()
+    check('order').notEmpty().isString().trim()
 ], async(req, res, next) => {
     try {
+        console.log(req.body)
         validationResult(req).throw();
         const jwt = req.jwt;
         const userOrder = req.body.order;
         let userComment = req.body.comment;
+        let commentArray = [];
 
         if (!(userComment && (typeof userComment == 'string') && userComment.length > 0 && userComment.length < 255)) {
-            userComment = null;
+            commentArray.push(null);
+        } else {
+            commentArray.push(userComment);
         }
 
-        let order = new Order(jwt.ID, userOrder, userComment, 1);
+        let order = new Order(jwt.ID, userOrder, commentArray.toString(), 1);
         await order.postToDb(res, next);
-        res.send({ 'success': true, 'data': { 'ID': order._ID, 'order': userOrder, 'comment': userComment, 'status': 1 } });
+        res.send({ 'success': true, 'data': { 'ID': order._ID, 'order': userOrder, 'comment': commentArray, 'status': 1 } });
     } catch (err) {
+        console.log(err)
         res.status(403).json();
     }
 });

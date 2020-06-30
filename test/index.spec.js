@@ -279,8 +279,9 @@ describe('test', () => {
         chai.request(server)
             .post("/order/new")
             .set('jwt', jwt)
-            .send({ 'order': 'Gta V', 'comment': 'urgente' })
+            .send({ 'order': "['Gta V', 'R6']", 'comment': 'urgente' })
             .end((err, res) => {
+                console.log(res.body)
                 res.should.have.status(200);
                 res.body.should.be.a("object");
                 res.body.should.have.property('success');
@@ -294,7 +295,7 @@ describe('test', () => {
         chai.request(server)
             .post("/order/new")
             .set('jwt', jwt)
-            .send({ 'order': 'Gta V' })
+            .send({ 'order': "['Gta V']" })
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.a("object");
