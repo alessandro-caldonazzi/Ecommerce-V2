@@ -213,6 +213,18 @@ describe('test', () => {
             });
     });
 
+    step("Aggiungo numero di telefono invalido", (done) => {
+        chai.request(server)
+            .post("/user/addphone")
+            .set("Cookie", refresh)
+            .set('jwt', jwt)
+            .send({ 'phone': 'aa890' })
+            .end((err, res) => {
+                res.should.have.status(403);
+                done();
+            });
+    });
+
     step("Forgot password", (done) => {
         chai.request(server)
             .post("/auth/forgot")
