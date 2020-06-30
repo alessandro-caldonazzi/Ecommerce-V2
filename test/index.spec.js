@@ -15,8 +15,8 @@ db.query('ALTER TABLE users AUTO_INCREMENT = 1', function(error, results, fields
 
 
 describe('test', () => {
-    let password;
-    let jwt;
+    let password, password2;
+    let jwt, jwt2;
     let refresh;
     let IDorder;
     step('registro utente valido', (done) => {
@@ -40,8 +40,14 @@ describe('test', () => {
                 res.should.have.status(200);
                 res.body.should.have.property('success');
                 res.body.success.should.equal(true);
+                password2 = res.body.data.password;
                 done();
             });
+    });
+
+    step('aggiungo privilegi ad utente email1', async(done) => {
+        await db.query('UPDATE users SET rank = 1 WHERE email = "email1@example.com"', [], function(error, results, fields) {});
+        done();
     });
 
     step('registro utente con mail uguale', (done) => {
@@ -88,6 +94,22 @@ describe('test', () => {
                 jwt = res.body.data.jwtToken;
                 res.header['set-cookie'].should.have.length(1);
                 refresh = res.header['set-cookie'][0];
+                res.body.data.temporaryPassword.should.equal(1);
+                should.equal(res.body.data.name, null);
+                done();
+            });
+    });
+
+    step('login con account rank 1', (done) => {
+        chai.request(server)
+            .post('/auth/login')
+            .send({ 'email': 'email1@example.com', 'password': password2 })
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.have.property('success');
+                res.body.success.should.equal(true);
+                jwt2 = res.body.data.jwtToken;
+                res.header['set-cookie'].should.have.length(1);
                 res.body.data.temporaryPassword.should.equal(1);
                 should.equal(res.body.data.name, null);
                 done();
@@ -289,6 +311,20 @@ describe('test', () => {
             .send({ 'status': 2, 'ID': IDorder })
             .end((err, res) => {
                 res.should.have.status(403);
+                done();
+            });
+    });
+
+    step("cambio stato ordine con permessi", (done) => {
+        chai.request(server)
+            .post("/order/changestatus")
+            .set('jwt', jwt2)
+            .send({ 'status': 2, 'ID': IDorder })
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a("object");
+                res.body.should.have.property('success');
+                res.body.success.should.equal(true);
                 done();
             });
     });
