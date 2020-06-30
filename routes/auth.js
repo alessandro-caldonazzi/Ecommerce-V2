@@ -23,7 +23,7 @@ router.post('/login', [
 
         let user = await userUtils.checkPassword(email, password, res, next);
         let { jwtToken, refreshToken } = await session.newSession({
-            'ID': user.rank,
+            'ID': user.ID,
             'referalID': user.referalID,
             'name': user.name,
             'email': email
