@@ -17,7 +17,9 @@ router.post('/new', [
         }
 
         let order = new Order(jwt.ID, userOrder, userComment, 1);
+        await order.postToDb(res, next);
 
+        res.send({ 'success': true, 'data': { 'order': userOrder, 'comment': userComment, 'status': 1 } })
     } catch (err) {
         console.log(err);
         res.status(403).json();

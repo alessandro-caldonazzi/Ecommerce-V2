@@ -22,7 +22,7 @@ app.use(session.middleware);
 app.use('/', indexRouter);
 app.use('/user', userRouter);
 app.use('/auth', authRouter);
-app.use('/auth', orderRouter);
+app.use('/order', orderRouter);
 
 session.settings("segreto", ["/dashboard", '/user/changepassword', '/user/changemail', '/user/addphone', '/user/deleteaccount', '/user/info', '/order/new'], "/auth/login", {
     "refreshUrl": "/auth/refresh",
