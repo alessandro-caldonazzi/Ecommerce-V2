@@ -328,4 +328,18 @@ describe('test', () => {
                 done();
             });
     });
+
+    step("aggiunta prezzo", (done) => {
+        chai.request(server)
+            .post("/order/addprice")
+            .set('jwt', jwt2)
+            .send({ 'price': 22.5, 'ID': IDorder })
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a("object");
+                res.body.should.have.property('success');
+                res.body.success.should.equal(true);
+                done();
+            });
+    });
 });
