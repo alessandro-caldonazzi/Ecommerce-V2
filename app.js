@@ -6,6 +6,7 @@ const session = require('session-jwt');
 const indexRouter = require('./routes/index');
 const userRouter = require('./routes/user');
 const authRouter = require('./routes/auth');
+const orderRouter = require('./routes/order');
 const helmet = require("helmet");
 
 // deepcode ignore UseCsurfForExpress: <please specify a reason of ignoring this>
@@ -21,8 +22,9 @@ app.use(session.middleware);
 app.use('/', indexRouter);
 app.use('/user', userRouter);
 app.use('/auth', authRouter);
+app.use('/auth', orderRouter);
 
-session.settings("segreto", ["/dashboard", '/user/changepassword', '/user/changemail', '/user/addphone', '/user/deleteaccount', '/user/info'], "/auth/login", {
+session.settings("segreto", ["/dashboard", '/user/changepassword', '/user/changemail', '/user/addphone', '/user/deleteaccount', '/user/info', '/order/new'], "/auth/login", {
     "refreshUrl": "/auth/refresh",
     "blacklisting": true,
     "JwtHeaderKeyName": "jwt"

@@ -1,6 +1,6 @@
 const dbUtils = require('../db/dbUtils');
 
-module.exports.Order = class Order {
+module.exports = class Order {
     constructor(userID, order, comment, status) {
         this.userID = userID;
         this.order = order;
