@@ -75,4 +75,17 @@ router.post('/addprice', [
     }
 });
 
+router.post('/list', async(req, res, next) => {
+    try {
+        validationResult(req).throw();
+        const jwt = req.jwt;
+
+        let orders = await Order.listOrder(jwt.ID);
+        res.send({ 'success': true, 'data': orders });
+
+    } catch (err) {
+        res.status(403).json();
+    }
+});
+
 module.exports = router;

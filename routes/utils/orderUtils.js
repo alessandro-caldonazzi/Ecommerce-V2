@@ -68,6 +68,10 @@ module.exports = class Order {
         }
     }
 
+    static async listOrder(userID, res, next) {
+        return await dbUtils.query('SELECT * FROM orders WHERE userID = ?', [userID], res, next);
+    }
+
     get order() {
         return this._order;
     }
