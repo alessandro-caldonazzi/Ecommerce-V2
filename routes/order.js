@@ -10,7 +10,7 @@ router.post('/new', [
         validationResult(req).throw();
         const jwt = req.jwt;
         const userOrder = req.body.order;
-        const userComment = req.body.comment;
+        let userComment = req.body.comment;
 
         if (!(userComment && (typeof userComment == 'string') && userComment.length > 0 && userComment.length < 255)) {
             userComment = null;
