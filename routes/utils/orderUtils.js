@@ -76,6 +76,12 @@ module.exports = class Order {
         return await dbUtils.query('SELECT orders.ID, orders.transactionID, orders.status, `order`, orders.comment, orders.userID, orders.price FROM orders INNER JOIN users ON orders.userID = users.ID WHERE users.email = ?', [email], res, next);
     }
 
+    static async deleteOrder(email, ID, res, next) {
+        let yesNo = await dbUtils.query('SELECT orders.ID FROM orders INNER JOIN users ON orders.userID = users.ID WHERE users.email = ? AND orders.ID = ?', [email, ID], res, next);
+
+        if (yesNo && yesNo.length > 0) await dbUtils.query('DELETE FROM orders WHERE ID = ?', [ID], res, next);
+    }
+
     get order() {
         return this._order;
     }

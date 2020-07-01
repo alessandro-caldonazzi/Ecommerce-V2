@@ -43,7 +43,7 @@ router.post('/changestatus', [
 
         let order = new Order();
         await order.getFromDb(ID, res, next);
-        await order.changeStatus(status);
+        await order.changeStatus(status, res, next);
         res.send({ 'success': true });
 
     } catch (err) {
@@ -66,7 +66,7 @@ router.post('/addprice', [
 
         let order = new Order();
         await order.getFromDb(ID, res, next);
-        await order.addPrice(price);
+        await order.addPrice(price, res, next);
         res.send({ 'success': true });
 
     } catch (err) {
@@ -78,7 +78,7 @@ router.post('/list', async(req, res, next) => {
     try {
         const jwt = req.jwt;
 
-        let orders = await Order.listOrder(jwt.ID);
+        let orders = await Order.listOrder(jwt.ID, res, next);
         res.send({ 'success': true, 'data': orders });
 
     } catch (err) {
@@ -96,8 +96,24 @@ router.post('/listfromemail', [
 
         if (jwt.rank < 1) throw 'Invalid Permission';
 
-        let orders = await Order.listOrderFromEmail(email);
+        let orders = await Order.listOrderFromEmail(email, res, next);
         res.send({ 'success': true, 'data': orders });
+
+    } catch (err) {
+        res.status(403).json();
+    }
+});
+
+router.post('/delete', [
+    check('ID').notEmpty().isLength({ min: 1, max: 10 }),
+], async(req, res, next) => {
+    try {
+        validationResult(req).throw();
+        const jwt = req.jwt;
+        const ID = Number.parseInt(req.body.ID);
+
+        await Order.deleteOrder(jwt.email, ID, res, next);
+        res.send({ 'success': true });
 
     } catch (err) {
         res.status(403).json();
