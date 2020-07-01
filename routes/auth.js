@@ -38,7 +38,7 @@ router.post('/login', [
             res.send({ 'success': true, 'data': { jwtToken } }).json();
         } else {
             // file deepcode ignore XSS: <please specify a reason of ignoring this>
-            res.send({ 'success': true, 'data': { jwtToken, 'temporaryPassword': user.temporaryPassword, 'name': user.name } }).json();
+            res.send({ 'success': true, 'data': { jwtToken, 'temporaryPassword': user.temporaryPassword, 'name': user.name, 'userID': user.ID } }).json();
         }
     } catch (error) {
         console.log(error)

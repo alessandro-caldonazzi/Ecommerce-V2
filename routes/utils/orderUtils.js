@@ -46,12 +46,12 @@ module.exports = class Order {
         await dbUtils.query('UPDATE orders SET status = ? WHERE ID = ?', [status, this._ID], res, next);
     }
 
-    async connectTransaction(transactionID, res, next) {
-        await dbUtils.query('UPDATE orders SET transactionID = ? WHERE ID = ?', [transactionID, this._ID], res, next)
+    async connectTransaction(res, next) {
+        await dbUtils.query('UPDATE orders SET transactionID = ? WHERE ID = ?', [this._transaction.ID, this._ID], res, next)
     }
 
     async createTransaction(type, res, next, userID, credits, status) {
-        let ID = await dbUtils.query('INSERT INTO transactions (type, userID, credits, status) VALUES (?, ?, ?, ?)', [type, userID, credit, status], res, next);
+        let ID = await dbUtils.query('INSERT INTO transactions (type, userID, credits, status) VALUES (?, ?, ?, ?)', [type, userID, credits, status], res, next);
         this._transaction = {
             'ID': ID.insertId,
             'type': type,

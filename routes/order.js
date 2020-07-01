@@ -52,24 +52,29 @@ router.post('/changestatus', [
 });
 
 router.post('/addprice', [
-    check('ID').notEmpty().isLength({ min: 1, max: 10 }),
+    check('userID').notEmpty().isLength({ min: 1, max: 10 }),
+    check('orderID').notEmpty().isLength({ min: 1, max: 10 }),
     check('price').notEmpty().matches('[0-9,.]+').isLength({ min: 1, max: 6 })
 ], async(req, res, next) => {
     try {
         validationResult(req).throw();
         const jwt = req.jwt;
-        const ID = Number.parseInt(req.body.ID);
+        const ID = Number.parseInt(req.body.orderID);
+        const userID = Number.parseInt(req.body.userID);
         const price = Number.parseFloat(req.body.price);
 
         if (jwt.rank < 1) throw 'Invalid Permission';
-        if (Number.isNaN(ID) || Number.isNaN(price)) throw 'Invalid ID or price';
+        if (Number.isNaN(ID) || Number.isNaN(userID) || Number.isNaN(price)) throw 'Invalid ID or price';
 
         let order = new Order();
         await order.getFromDb(ID, res, next);
         await order.addPrice(price, res, next);
+        await order.createTransaction(1, res, next, userID, price, 1);
+        await order.connectTransaction(res, next)
         res.send({ 'success': true });
 
     } catch (err) {
+        console.log(err)
         res.status(403).json();
     }
 });
