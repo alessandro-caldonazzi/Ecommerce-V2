@@ -18,7 +18,7 @@ describe('test', () => {
     let password, password2;
     let jwt, jwt2;
     let refresh;
-    let IDorder, IDorder2;
+    let IDorder, IDorder2, userID;
     step('registro utente valido', (done) => {
         chai.request(server)
             .post('/auth/register')
@@ -94,6 +94,7 @@ describe('test', () => {
                 jwt = res.body.data.jwtToken;
                 res.header['set-cookie'].should.have.length(1);
                 refresh = res.header['set-cookie'][0];
+                userID = res.body.data.userID;
                 res.body.data.temporaryPassword.should.equal(1);
                 should.equal(res.body.data.name, null);
                 done();
@@ -336,7 +337,7 @@ describe('test', () => {
         chai.request(server)
             .post("/order/addprice")
             .set('jwt', jwt2)
-            .send({ 'price': 22.5, 'ID': IDorder })
+            .send({ 'price': 22.5, 'orderID': IDorder, 'userID': userID })
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.a("object");
