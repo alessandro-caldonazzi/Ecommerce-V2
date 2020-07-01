@@ -356,4 +356,18 @@ describe('test', () => {
                 done();
             });
     });
+
+    step("lista ordini da admin", (done) => {
+        chai.request(server)
+            .post("/order/listfromemail")
+            .send({ 'email': 'nuovamail@example.com' })
+            .set('jwt', jwt2)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a("object");
+                res.body.should.have.property('success');
+                res.body.success.should.equal(true);
+                done();
+            });
+    });
 });
