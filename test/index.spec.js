@@ -18,7 +18,7 @@ describe('test', () => {
     let password, password2;
     let jwt, jwt2;
     let refresh;
-    let IDorder;
+    let IDorder, IDorder2;
     step('registro utente valido', (done) => {
         chai.request(server)
             .post('/auth/register')
@@ -301,6 +301,8 @@ describe('test', () => {
                 res.body.should.be.a("object");
                 res.body.should.have.property('success');
                 res.body.success.should.equal(true);
+                IDorder2 = res.body.data.ID;
+                console.log(IDorder2);
                 done();
             });
     });
@@ -362,6 +364,20 @@ describe('test', () => {
             .post("/order/listfromemail")
             .send({ 'email': 'nuovamail@example.com' })
             .set('jwt', jwt2)
+            .end((err, res) => {
+                res.should.have.status(200);
+                res.body.should.be.a("object");
+                res.body.should.have.property('success');
+                res.body.success.should.equal(true);
+                done();
+            });
+    });
+
+    step(`elimino ordine`, (done) => {
+        chai.request(server)
+            .post("/order/delete")
+            .send({ 'ID': IDorder2 })
+            .set('jwt', jwt)
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.a("object");
