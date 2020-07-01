@@ -24,7 +24,7 @@ app.use('/user', userRouter);
 app.use('/auth', authRouter);
 app.use('/order', orderRouter);
 
-session.settings("segreto", ["/dashboard", '/user/changepassword', '/user/changemail', '/user/addphone', '/user/deleteaccount', '/user/info', '/order/new', '/order/changestatus', '/order/addprice', '/order/list'], "/auth/login", {
+session.settings("segreto", ["/dashboard", '/user/changepassword', '/user/changemail', '/user/addphone', '/user/deleteaccount', '/user/info', '/order/new', '/order/changestatus', '/order/addprice', '/order/list', '/order/listfromemail'], "/auth/login", {
     "refreshUrl": "/auth/refresh",
     "blacklisting": true,
     "JwtHeaderKeyName": "jwt"

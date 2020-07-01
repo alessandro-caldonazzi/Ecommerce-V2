@@ -72,6 +72,10 @@ module.exports = class Order {
         return await dbUtils.query('SELECT * FROM orders WHERE userID = ?', [userID], res, next);
     }
 
+    static async listOrderFromEmail(email, res, next) {
+        return await dbUtils.query('SELECT orders.ID, orders.transactionID, orders.status, `order`, orders.comment, orders.userID, orders.price FROM orders INNER JOIN users ON orders.userID = users.ID WHERE users.email = ?', [email], res, next);
+    }
+
     get order() {
         return this._order;
     }

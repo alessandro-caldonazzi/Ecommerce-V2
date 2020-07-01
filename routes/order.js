@@ -7,7 +7,6 @@ router.post('/new', [
     check('order').notEmpty().isString().trim()
 ], async(req, res, next) => {
     try {
-        console.log(req.body)
         validationResult(req).throw();
         const jwt = req.jwt;
         const userOrder = req.body.order;
@@ -77,10 +76,27 @@ router.post('/addprice', [
 
 router.post('/list', async(req, res, next) => {
     try {
-        validationResult(req).throw();
         const jwt = req.jwt;
 
         let orders = await Order.listOrder(jwt.ID);
+        res.send({ 'success': true, 'data': orders });
+
+    } catch (err) {
+        res.status(403).json();
+    }
+});
+
+router.post('/listfromemail', [
+    check('email').isEmail(),
+], async(req, res, next) => {
+    try {
+        validationResult(req).throw();
+        const jwt = req.jwt;
+        const email = req.body.email;
+
+        if (jwt.rank < 1) throw 'Invalid Permission';
+
+        let orders = await Order.listOrderFromEmail(email);
         res.send({ 'success': true, 'data': orders });
 
     } catch (err) {
