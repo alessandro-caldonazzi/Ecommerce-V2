@@ -149,14 +149,14 @@ describe('test', () => {
 
     step("Prova refresh senza jwt", (done) => {
         chai.request(server)
-            .post("/auth/refresh")
+            .get("/auth/refresh")
             .set("Cookie", refresh)
             .end((err, res) => {
                 res.should.have.status(200);
                 res.body.should.be.a("object");
                 res.body.should.have.property('success');
                 res.body.success.should.equal(true);
-                jwt = res.body.data.jwtToken;
+                jwt = res.body.jwt;
                 done();
             });
     });
