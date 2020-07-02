@@ -68,6 +68,12 @@ module.exports = class Order {
         }
     }
 
+    async isOrderOfUser(email, res, next) {
+        let emailOrder = await dbUtils.query('SELECT users.email FROM orders INNER JOIN users ON orders.userID = users.ID WHERE orders.ID = ?', [this.ID], res, next);
+        emailOrder = emailOrder[0];
+        return emailOrder == email
+    }
+
     static async listOrder(userID, res, next) {
         return await dbUtils.query('SELECT * FROM orders WHERE userID = ?', [userID], res, next);
     }
