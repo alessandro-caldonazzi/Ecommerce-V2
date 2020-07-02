@@ -107,14 +107,15 @@ router.post('/register', [
             res.send({ 'success': true, 'data': { password } }).json();
         }
     } catch (err) {
+        console.log(err)
         res.status(403).json();
     }
 });
 
-router.post('/refresh', async(req, res, next) => {
-    let jwtToken = await session.refresh(req);
-    if (jwtToken) {
-        res.send({ 'success': true, 'data': { jwtToken } }).json();
+router.get('/refresh', async(req, res, next) => {
+    let jwt = await session.refresh(req);
+    if (jwt) {
+        res.send({ 'success': true, jwt }).json();
     } else {
         res.redirect(301, "/auth/login");
         res.end();
