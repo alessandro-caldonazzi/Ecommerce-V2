@@ -3,6 +3,7 @@ const router = express.Router();
 const { check, validationResult } = require('express-validator');
 const Order = require('./utils/orderUtils');
 const stripe = require('stripe')(process.env.sk);
+let sessionJson = require('./mock/stripeSession.json');
 
 router.post('/new', [
     check('orderID').notEmpty().isLength({ min: 1, max: 10 }),
@@ -15,24 +16,13 @@ router.post('/new', [
         let order = new Order();
         await order.getFromDb(orderID, res, next);
 
+        if (!order.isOrderOfUser(jwt.email, res, next)) throw 'This is not your order!';
         if (!order._price) throw 'There is not price';
 
-        const session = await stripe.checkout.sessions.create({
-            payment_method_types: ['card'],
-            line_items: [{
-                price_data: {
-                    currency: 'eur',
-                    product_data: {
-                        name: 'T-shirt',
-                    },
-                    unit_amount: 2000,
-                },
-                quantity: 1,
-            }],
-            mode: 'payment',
-            success_url: 'http://localhost/payment/success?session_id={CHECKOUT_SESSION_ID}',
-            cancel_url: 'http://localhost/cancel',
-        });
+        sessionJson['line_items'][0]['price_data']['unit_amount'] = order._price * 100;
+        sessionJson['line_items'][0]['price_data']['product_data']['name'] = 'Order N. ' + order._ID;
+
+        const session = await stripe.checkout.sessions.create(sessionJson);
         res.json({ session_id: session.id });
 
     } catch (err) {
