@@ -6,7 +6,7 @@ const stripe = require('stripe')(process.env.sk);
 let sessionJson = require('./mock/stripeSession.json');
 
 router.post('/new', [
-    check('orderID').notEmpty().isLength({ min: 1, max: 10 }),
+    check('orderID').notEmpty().isLength({ min: 1, max: 10 })
 ], async(req, res, next) => {
     try {
         validationResult(req).throw();
@@ -23,6 +23,7 @@ router.post('/new', [
         sessionJson['line_items'][0]['price_data']['product_data']['name'] = 'Order N. ' + order._ID;
 
         const session = await stripe.checkout.sessions.create(sessionJson);
+        console.log(session.id)
         res.json({ session_id: session.id });
 
     } catch (err) {
@@ -31,4 +32,16 @@ router.post('/new', [
     }
 });
 
+router.get('/success', [
+    check('session_id').notEmpty()
+], async(req, res, next) => {
+    try {
+        validationResult(req).throw();
+        console.log(req.query.session_id)
+        res.send('')
+    } catch (err) {
+        console.log(err)
+        res.status(403).json();
+    }
+});
 module.exports = router;
