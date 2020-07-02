@@ -7,6 +7,8 @@ const indexRouter = require('./routes/index');
 const userRouter = require('./routes/user');
 const authRouter = require('./routes/auth');
 const orderRouter = require('./routes/order');
+const paymentRouter = require('./routes/payment');
+
 const helmet = require("helmet");
 
 // deepcode ignore UseCsurfForExpress: <please specify a reason of ignoring this>
@@ -17,14 +19,25 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
+
+app.use(function(req, res, next) {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+    res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+    next();
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session.middleware);
 app.use('/', indexRouter);
 app.use('/user', userRouter);
 app.use('/auth', authRouter);
 app.use('/order', orderRouter);
+app.use('/payment', paymentRouter);
 
-session.settings("segreto", ["/dashboard", '/user/changepassword', '/user/changemail', '/user/addphone', '/user/deleteaccount', '/user/info', '/order/new', '/order/changestatus', '/order/addprice', '/order/list', '/order/listfromemail', '/order/delete'], "/auth/login", {
+
+
+session.settings("segreto", ["/dashboard", '/user/changepassword', '/user/changemail', '/user/addphone', '/user/deleteaccount', '/user/info', '/order/new', '/order/changestatus', '/order/addprice', '/order/list', '/order/listfromemail', '/order/delete', '/payment/new'], "/auth/login", {
     "refreshUrl": "/auth/refresh",
     "blacklisting": true,
     "JwtHeaderKeyName": "jwt"
